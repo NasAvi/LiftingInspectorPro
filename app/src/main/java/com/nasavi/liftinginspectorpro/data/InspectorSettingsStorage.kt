@@ -41,6 +41,7 @@ object InspectorSettingsStorage {
     private const val KEY_INSPECTOR_PHONE = "inspector_phone"
     private const val KEY_INSPECTOR_EMAIL = "inspector_email"
     private const val KEY_BUSINESS_ID = "business_id"
+    private const val KEY_SITES = "inspection_sites"
 
     data class InspectorDetails(
         val firstName: String,
@@ -59,6 +60,12 @@ object InspectorSettingsStorage {
         val phone: String = "",
         val email: String = "",
         val businessId: String = ""
+    )
+
+    data class Site(
+        val id: String,
+        val name: String,
+        val address: String = ""
     )
 
     data class ReportTextSettings(
@@ -292,6 +299,31 @@ object InspectorSettingsStorage {
             .putString(KEY_INSPECTOR_EMAIL, details.email)
             .putString(KEY_BUSINESS_ID, details.businessId)
             .apply()
+    }
+
+    fun getSites(context: Context): List<Site> {
+        val json = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .getString(KEY_SITES, null) ?: return emptyList()
+        return try {
+            val arr = JSONArray(json)
+            (0 until arr.length()).map { i ->
+                val o = arr.getJSONObject(i)
+                Site(id = o.getString("id"), name = o.getString("name"), address = o.optString("address", ""))
+            }
+        } catch (_: Exception) { emptyList() }
+    }
+
+    fun saveSites(context: Context, sites: List<Site>) {
+        val arr = JSONArray()
+        sites.forEach { s ->
+            val o = JSONObject()
+            o.put("id", s.id)
+            o.put("name", s.name)
+            o.put("address", s.address)
+            arr.put(o)
+        }
+        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .edit().putString(KEY_SITES, arr.toString()).apply()
     }
 
     fun getReportTextSettings(context: Context): ReportTextSettings {

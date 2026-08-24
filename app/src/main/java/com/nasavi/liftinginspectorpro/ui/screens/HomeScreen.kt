@@ -658,6 +658,11 @@ private fun GeneralSettingsDialog(onDismiss: () -> Unit, onSaved: () -> Unit = {
     var company by remember { mutableStateOf(InspectorSettingsStorage.getCompanyDetails(context)) }
     var logoPath by remember { mutableStateOf(InspectorSettingsStorage.getLogoPath(context)) }
     var nextAccessoriesNum by remember { mutableStateOf(InspectorSettingsStorage.getNextReportNumber(context)) }
+    var sites by remember { mutableStateOf(InspectorSettingsStorage.getSites(context)) }
+    var showSiteDialog by remember { mutableStateOf(false) }
+    var editingSiteIndex by remember { mutableStateOf<Int?>(null) }
+    var siteNameInput by remember { mutableStateOf("") }
+    var siteAddressInput by remember { mutableStateOf("") }
     var tab by remember { mutableStateOf(0) }
     var tempTheme by remember { mutableStateOf(AppThemeState.current) }
     var pickerCategory by remember { mutableStateOf("") }
@@ -687,6 +692,7 @@ private fun GeneralSettingsDialog(onDismiss: () -> Unit, onSaved: () -> Unit = {
                     Tab(selected = tab == 2, onClick = { tab = 2 }) { Text("חברה/מפעל", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
                     Tab(selected = tab == 3, onClick = { tab = 3 }) { Text("מספרי תסקיר", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
                     Tab(selected = tab == 4, onClick = { tab = 4 }) { Text("צבעים", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
+                    Tab(selected = tab == 5, onClick = { tab = 5 }) { Text("אתרים", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
                 }
                 Column(
                     modifier = Modifier
@@ -795,6 +801,82 @@ private fun GeneralSettingsDialog(onDismiss: () -> Unit, onSaved: () -> Unit = {
                                 )
                             }
                         }
+                        5 -> {
+                            Text("אתרי בדיקה", fontWeight = FontWeight.Bold)
+                            Text("הגדר אתרים — כל תסקיר יתויג לפי אתר", fontSize = 11.sp, color = Color.Gray)
+                            Spacer(Modifier.height(4.dp))
+                            if (sites.isEmpty()) {
+                                Text("לא הוגדרו אתרים עדיין", fontSize = 13.sp, color = Color.Gray)
+                            } else {
+                                sites.forEachIndexed { idx, site ->
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().border(1.dp, Color.LightGray, androidx.compose.foundation.shape.RoundedCornerShape(8.dp)).padding(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(site.name, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                                            if (site.address.isNotBlank()) Text(site.address, fontSize = 12.sp, color = Color.Gray)
+                                        }
+                                        TextButton(onClick = {
+                                            editingSiteIndex = idx
+                                            siteNameInput = site.name
+                                            siteAddressInput = site.address
+                                            showSiteDialog = true
+                                        }, contentPadding = PaddingValues(horizontal = 6.dp)) { Text("עריכה", fontSize = 12.sp) }
+                                        TextButton(onClick = {
+                                            sites = sites.toMutableList().also { it.removeAt(idx) }
+                                        }, contentPadding = PaddingValues(horizontal = 6.dp)) { Text("הסר", fontSize = 12.sp, color = Color(0xFFC62828)) }
+                                    }
+                                }
+                            }
+                            Spacer(Modifier.height(4.dp))
+                            Button(
+                                onClick = {
+                                    editingSiteIndex = null
+                                    siteNameInput = ""
+                                    siteAddressInput = ""
+                                    showSiteDialog = true
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) { Text("+ הוסף אתר") }
+                            if (showSiteDialog) {
+                                Dialog(onDismissRequest = { showSiteDialog = false }) {
+                                    Surface(shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()) {
+                                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                            Text(if (editingSiteIndex == null) "הוספת אתר חדש" else "עריכת אתר", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                            OutlinedTextField(value = siteNameInput, onValueChange = { siteNameInput = it }, label = { Text("שם האתר") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                                            OutlinedTextField(value = siteAddressInput, onValueChange = { siteAddressInput = it }, label = { Text("כתובת (אופציונלי)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                                                TextButton(onClick = { showSiteDialog = false }, modifier = Modifier.weight(1f)) { Text("ביטול") }
+                                                Button(
+                                                    onClick = {
+                                                        val name = siteNameInput.trim()
+                                                        if (name.isNotBlank()) {
+                                                            val idx = editingSiteIndex
+                                                            sites = if (idx == null) {
+                                                                val newSite = InspectorSettingsStorage.Site(
+                                                                    id = System.currentTimeMillis().toString(),
+                                                                    name = name,
+                                                                    address = siteAddressInput.trim()
+                                                                )
+                                                                sites + newSite
+                                                            } else {
+                                                                sites.toMutableList().also { list ->
+                                                                    list[idx] = list[idx].copy(name = name, address = siteAddressInput.trim())
+                                                                }
+                                                            }
+                                                        }
+                                                        showSiteDialog = false
+                                                    },
+                                                    modifier = Modifier.weight(1f)
+                                                ) { Text("שמור") }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -803,6 +885,7 @@ private fun GeneralSettingsDialog(onDismiss: () -> Unit, onSaved: () -> Unit = {
             TextButton(onClick = {
                 InspectorSettingsStorage.saveSettings(context, firstName, lastName, certNumber, nextAccessoriesNum.trim())
                 InspectorSettingsStorage.saveCompanyDetails(context, company)
+                InspectorSettingsStorage.saveSites(context, sites)
                 AppThemeState.save(context, tempTheme)
                 onSaved()
                 onDismiss()

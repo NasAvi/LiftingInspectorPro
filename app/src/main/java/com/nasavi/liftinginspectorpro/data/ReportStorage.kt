@@ -71,7 +71,8 @@ object ReportStorage {
         val html: String,
         // קוד מלא 12:
         // true = כבר הופקה לפחות גרסת PDF אחת, ולכן לא מוסיפים אביזרים חדשים לתסקיר זה.
-        val isLockedForNewAccessories: Boolean = false
+        val isLockedForNewAccessories: Boolean = false,
+        val site: String = ""
     )
 
     /**
@@ -413,6 +414,7 @@ object ReportStorage {
         obj.put("html", "")
         obj.put("htmlFileName", workingHtmlFileName)
         obj.put("isLockedForNewAccessories", report.isLockedForNewAccessories)
+        obj.put("site", report.site)
 
         val accessoriesArray = JSONArray()
         report.accessories.forEach {
@@ -506,7 +508,8 @@ object ReportStorage {
             defects = defects,
             notes = notes,
             html = "",  // לא טוענים HTML מקובץ בעת loadWorkingReports — מונע OOM מ-25+ קבצי 2–3MB
-            isLockedForNewAccessories = obj.optBoolean("isLockedForNewAccessories", false)
+            isLockedForNewAccessories = obj.optBoolean("isLockedForNewAccessories", false),
+            site = obj.optString("site", "")
         )
     }
 
