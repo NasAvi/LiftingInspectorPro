@@ -683,9 +683,10 @@ private fun GeneralSettingsDialog(onDismiss: () -> Unit, onSaved: () -> Unit = {
             Column {
                 ScrollableTabRow(selectedTabIndex = tab, edgePadding = 0.dp) {
                     Tab(selected = tab == 0, onClick = { tab = 0 }) { Text("בודק פנים מפעלי", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
-                    Tab(selected = tab == 1, onClick = { tab = 1 }) { Text("חתימה/חותמת מפעל", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
-                    Tab(selected = tab == 2, onClick = { tab = 2 }) { Text("מספרי תסקיר", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
-                    Tab(selected = tab == 3, onClick = { tab = 3 }) { Text("צבעים", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
+                    Tab(selected = tab == 1, onClick = { tab = 1 }) { Text("חתימה/חותמת", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
+                    Tab(selected = tab == 2, onClick = { tab = 2 }) { Text("חברה/מפעל", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
+                    Tab(selected = tab == 3, onClick = { tab = 3 }) { Text("מספרי תסקיר", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
+                    Tab(selected = tab == 4, onClick = { tab = 4 }) { Text("צבעים", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
                 }
                 Column(
                     modifier = Modifier
@@ -701,8 +702,6 @@ private fun GeneralSettingsDialog(onDismiss: () -> Unit, onSaved: () -> Unit = {
                             OutlinedTextField(value = certNumber, onValueChange = { certNumber = it.filter { ch -> ch.isDigit() } }, label = { Text("מספר הסמכה / מספר בודק") }, modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
                         }
                         1 -> {
-                            OutlinedTextField(value = company.companyName, onValueChange = { company = company.copy(companyName = it) }, label = { Text("שם המפעל") }, modifier = Modifier.fillMaxWidth())
-                            Spacer(modifier = Modifier.height(4.dp))
                             Text("לוגו:", fontWeight = FontWeight.Bold)
                             Text(if (logoPath.isNotBlank()) "לוגו קיים" else "לא נבחר לוגו", fontSize = 12.sp)
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -733,6 +732,15 @@ private fun GeneralSettingsDialog(onDismiss: () -> Unit, onSaved: () -> Unit = {
                             }
                         }
                         2 -> {
+                            OutlinedTextField(value = company.companyName, onValueChange = { company = company.copy(companyName = it) }, label = { Text("שם המפעל / החברה") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = company.companyTitle, onValueChange = { company = company.copy(companyTitle = it) }, label = { Text("תואר / תפקיד") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = company.address, onValueChange = { company = company.copy(address = it) }, label = { Text("כתובת") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = company.city, onValueChange = { company = company.copy(city = it) }, label = { Text("עיר") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = company.phone, onValueChange = { company = company.copy(phone = it) }, label = { Text("טלפון") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = company.email, onValueChange = { company = company.copy(email = it) }, label = { Text("אימייל") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = company.businessId, onValueChange = { company = company.copy(businessId = it) }, label = { Text("מספר מפעל / ח.פ.") }, modifier = Modifier.fillMaxWidth())
+                        }
+                        3 -> {
                             Text("מספר תסקיר הבא — אביזרי הרמה", fontWeight = FontWeight.Bold)
                             OutlinedTextField(
                                 value = nextAccessoriesNum,
@@ -742,7 +750,7 @@ private fun GeneralSettingsDialog(onDismiss: () -> Unit, onSaved: () -> Unit = {
                                 textStyle = TextStyle(textDirection = TextDirection.Ltr)
                             )
                         }
-                        3 -> {
+                        4 -> {
                             Text("צבעי ממשק האפליקציה", fontWeight = FontWeight.Bold)
                             Text("לחץ על ריבוע הצבע או 'בחר' לפתיחת בורר הצבעים", fontSize = 11.sp, color = Color.Gray)
                             Spacer(Modifier.height(4.dp))
