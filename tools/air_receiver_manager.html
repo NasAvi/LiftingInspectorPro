@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מנהל תסקירי קולטי אוויר</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:#E0F7FA;color:#1a1a1a;direction:rtl;min-height:100vh;}
+
+.app-header{
+  background:#00796B;color:white;
+  padding:14px 20px 10px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
+.app-header h1{font-size:20px;font-weight:bold;text-align:center;margin-bottom:6px;}
+.header-sub{text-align:center;font-size:12px;opacity:0.8;margin-bottom:8px;}
+
+.toolbar{
+  display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  padding:10px 16px;background:#00897B;
+}
+.toolbar input[type=text]{
+  flex:1;min-width:180px;padding:7px 12px;border:none;border-radius:6px;
+  font-size:14px;font-family:Arial;direction:rtl;
+  background:rgba(255,255,255,0.2);color:white;
+}
+.toolbar input[type=text]::placeholder{color:rgba(255,255,255,0.6);}
+.toolbar input[type=text]:focus{outline:none;background:rgba(255,255,255,0.3);}
+
+.btn{padding:8px 18px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-family:Arial;font-weight:bold;transition:all 0.15s;}
+.btn-white{background:#fff;color:#00796B;}
+.btn-white:hover{background:#E0F7FA;}
+.btn-teal{background:#004D40;color:white;}
+.btn-teal:hover{background:#00251A;}
+.btn-outline{background:transparent;color:white;border:1.5px solid rgba(255,255,255,0.7);}
+.btn-outline:hover{background:rgba(255,255,255,0.15);}
+.btn-red{background:#C62828;color:white;}
+
+.content{padding:16px;max-width:1200px;margin:0 auto;}
+
+.welcome{
+  text-align:center;padding:60px 20px;
+  background:white;border-radius:12px;
+  border:3px dashed #80CBC4;margin-top:20px;
+}
+.welcome h2{font-size:22px;color:#00796B;margin-bottom:12px;}
+.welcome p{color:#555;margin-bottom:20px;line-height:1.7;}
+.welcome .big-icon{font-size:64px;margin-bottom:16px;}
+
+.stats-bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.stat-card{
+  background:white;border-radius:10px;padding:12px 20px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.1);
+  display:flex;flex-direction:column;align-items:center;min-width:120px;
+}
+.stat-num{font-size:28px;font-weight:bold;color:#00796B;}
+.stat-label{font-size:12px;color:#666;margin-top:2px;}
+
+.filter-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.chip{
+  padding:5px 14px;border-radius:20px;border:1.5px solid #00796B;
+  background:white;color:#00796B;cursor:pointer;font-size:12px;font-family:Arial;
+  transition:all 0.15s;
+}
+.chip.active{background:#00796B;color:white;}
+.chip:hover{background:#B2DFDB;color:#00796B;}
+
+.reports-table{
+  background:white;border-radius:12px;
+  box-shadow:0 1px 6px rgba(0,0,0,0.1);
+  overflow:hidden;
+}
+.reports-table table{width:100%;border-collapse:collapse;}
+.reports-table th{
+  background:#00796B;color:white;padding:10px 12px;
+  font-size:13px;text-align:right;white-space:nowrap;
+}
+.reports-table td{
+  padding:8px 12px;border-bottom:1px solid #f0f0f0;
+  font-size:13px;vertical-align:middle;
+}
+.reports-table tr:last-child td{border-bottom:none;}
+.reports-table tr:hover td{background:#E0F7FA;}
+
+.report-num{
+  display:inline-block;padding:3px 10px;border-radius:12px;
+  background:#E0F7FA;color:#00796B;font-weight:bold;font-size:12px;cursor:pointer;
+}
+.report-num:hover{background:#00796B;color:white;}
+
+.version-chip{
+  display:inline-block;padding:2px 8px;border-radius:10px;
+  background:#B2DFDB;color:#004D40;font-size:11px;cursor:pointer;margin:2px;
+}
+.version-chip:hover{background:#00796B;color:white;}
+
+.badge-type{
+  display:inline-block;padding:2px 10px;border-radius:10px;
+  background:#E0F2F1;color:#004D40;font-size:11px;white-space:nowrap;
+}
+.badge-periodic{background:#E8F5E9;color:#1B5E20;}
+.badge-special{background:#FFF9C4;color:#F57F17;}
+
+.panel-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;
+  justify-content:center;align-items:flex-start;padding:30px 16px;overflow-y:auto;
+}
+.panel-overlay.open{display:flex;}
+.panel-box{
+  background:white;border-radius:12px;width:100%;max-width:900px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);overflow:hidden;
+}
+.panel-header{
+  background:#00796B;color:white;padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.panel-header h2{font-size:16px;font-weight:bold;}
+.panel-close{background:none;border:none;color:white;font-size:22px;cursor:pointer;line-height:1;}
+.panel-body{padding:0;}
+.panel-iframe{width:100%;height:80vh;border:none;display:block;}
+
+.upload-zone{
+  border:3px dashed #80CBC4;border-radius:12px;padding:40px;
+  text-align:center;cursor:pointer;background:#F0FDFA;
+  transition:all 0.2s;margin-bottom:12px;
+}
+.upload-zone:hover,.upload-zone.drag-over{background:#B2DFDB;border-color:#00796B;}
+.upload-zone p{color:#555;margin-top:8px;font-size:14px;}
+
+.instructions-box{
+  background:#E8F5E9;border-right:4px solid #2E7D32;padding:16px;border-radius:8px;
+  margin-bottom:16px;
+}
+.instructions-box h3{font-size:15px;color:#1B5E20;margin-bottom:10px;}
+.instructions-box ol{padding-right:20px;}
+.instructions-box li{font-size:13px;color:#333;margin-bottom:6px;line-height:1.6;}
+.instructions-box code{background:#C8E6C9;padding:1px 6px;border-radius:4px;font-family:monospace;font-size:12px;}
+
+#emptyRow td{text-align:center;color:#999;padding:32px;}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>מנהל תסקירי קולטי אוויר וקומפרסורים</h1>
+  <div class="header-sub" id="headerSub">טען קובץ JSON שיוצא מהאפליקציה</div>
+  <div class="toolbar">
+    <input type="text" id="searchInput" placeholder="חיפוש לפי לקוח / מספר / סוג..." oninput="applyFilters()">
+    <button class="btn btn-white" onclick="document.getElementById('fileInput').click()">📂 טען קובץ</button>
+    <button class="btn btn-outline" id="btnPrint" onclick="window.print()" style="display:none">🖨 הדפס רשימה</button>
+    <button class="btn btn-outline" onclick="clearData()" id="btnClear" style="display:none">✕ נקה</button>
+    <input type="file" id="fileInput" accept=".json" style="display:none" onchange="loadFile(event)">
+  </div>
+</div>
+
+<div class="content">
+  <!-- Welcome -->
+  <div class="welcome" id="welcomeDiv">
+    <div class="big-icon">🌬️</div>
+    <h2>מנהל תסקירי קולטי אוויר</h2>
+    <p>גרור לכאן קובץ JSON שיוצא מהאפליקציה,<br>או לחץ על "טען קובץ" בסרגל למעלה.</p>
+
+    <div class="instructions-box" style="text-align:right;max-width:600px;margin:20px auto 0;">
+      <h3>📱 כיצד לייצא תסקירים מהאפליקציה?</h3>
+      <ol>
+        <li>פתח את האפליקציה בנייד ועבור למסך <strong>קולטי אוויר וקומפרסורים</strong></li>
+        <li>לחץ על הכפתור <strong>"ייצוא תסקירים למחשב"</strong></li>
+        <li>הקובץ יישמר בתיקיית <code>הורדות</code> בנייד בשם <code>air_receiver_reports_YYYY-MM-DD.json</code></li>
+        <li>חבר את הנייד למחשב ב-USB (בחר "העברת קבצים / MTP")</li>
+        <li>העתק את הקובץ מתיקיית <code>הורדות</code> בנייד לשולחן העבודה</li>
+        <li>גרור את הקובץ לכאן <strong>— או —</strong> לחץ על "טען קובץ" ובחר אותו</li>
+      </ol>
+      <p style="margin-top:10px;font-size:12px;color:#555;">💡 אפשר גם לשלוח את הקובץ לעצמך ב-WhatsApp/אימייל ולהוריד למחשב.</p>
+    </div>
+
+    <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <div style="font-size:40px">📤</div>
+      <p>לחץ כאן או גרור קובץ JSON</p>
+    </div>
+  </div>
+
+  <!-- Dashboard (hidden until file loaded) -->
+  <div id="dashboard" style="display:none">
+    <div class="stats-bar" id="statsBar"></div>
+    <div class="filter-chips" id="filterChips"></div>
+    <div class="reports-table">
+      <table>
+        <thead>
+          <tr>
+            <th>מספר תסקיר</th>
+            <th>תאריך</th>
+            <th>לקוח</th>
+            <th>סוג קולט</th>
+            <th>מספר סידורי</th>
+            <th>נפח (ל')</th>
+            <th>לחץ תכנון</th>
+            <th>סוג בדיקה</th>
+            <th>בדיקה הבאה</th>
+            <th>גרסאות</th>
+          </tr>
+        </thead>
+        <tbody id="reportsTbody">
+          <tr id="emptyRow"><td colspan="10">אין תסקירים להצגה</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Report preview panel -->
+<div class="panel-overlay" id="previewPanel">
+  <div class="panel-box">
+    <div class="panel-header">
+      <h2 id="panelTitle">תסקיר</h2>
+      <button class="btn btn-white" id="panelPrintBtn" onclick="printFromPanel()" style="display:none">🖨 הדפס / PDF</button>
+      <button class="panel-close" onclick="closePanel()">✕</button>
+    </div>
+    <div class="panel-body">
+      <iframe id="panelIframe" class="panel-iframe"></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+let allReports = [];
+let activeTypeFilter = 'הכל';
+let exportMeta = {};
+let currentViewHtml = '';
+const htmlMap = {};
+
+// ── IndexedDB persistence ──
+const IDB_DB='AirReceiverMgr', IDB_VER=1, IDB_STORE='data', IDB_KEY='last';
+function openIDB(){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open(IDB_DB,IDB_VER);
+    r.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains(IDB_STORE))db.createObjectStore(IDB_STORE);};
+    r.onsuccess=e=>res(e.target.result);
+    r.onerror=e=>rej(e.target.error);
+  });
+}
+async function saveIDB(data){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(IDB_STORE,'readwrite');tx.objectStore(IDB_STORE).put(data,IDB_KEY);tx.oncomplete=res;tx.onerror=e=>rej(e.target.error);});}
+async function readIDB(){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(IDB_STORE,'readonly');const r=tx.objectStore(IDB_STORE).get(IDB_KEY);r.onsuccess=e=>res(e.target.result);r.onerror=e=>rej(e.target.error);});}
+async function clearIDB(){const db=await openIDB();return new Promise((res,rej)=>{const tx=db.transaction(IDB_STORE,'readwrite');tx.objectStore(IDB_STORE).delete(IDB_KEY);tx.oncomplete=res;tx.onerror=e=>rej(e.target.error);});}
+
+function showToast(msg){
+  let t=document.getElementById('toastMsg');
+  if(!t){t=document.createElement('div');t.id='toastMsg';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#323232;color:white;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;max-width:90%;text-align:center;font-family:Arial';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(()=>t.style.opacity='0',3500);
+}
+
+// ── Drag & drop ──
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) parseJsonFile(file);
+});
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.json')) parseJsonFile(file);
+});
+
+function loadFile(event) {
+  const file = event.target.files[0];
+  if (file) parseJsonFile(file);
+}
+
+function loadData(data, fromCache) {
+  allReports = data.reports;
+  Object.keys(htmlMap).forEach(k => delete htmlMap[k]);
+  allReports.forEach(r => { htmlMap[r.versionName] = r.htmlContent || ''; });
+  exportMeta = { date: data.exportDate || '', inspector: data.inspectorName || '' };
+  initDashboard();
+  if (fromCache) showToast('נטענו ' + allReports.length + ' תסקירים מהפעלה קודמת ✓');
+}
+
+function parseJsonFile(file) {
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.reports) { alert('קובץ לא תקין — חסר שדה reports'); return; }
+      try { await saveIDB(data); } catch(se) { console.warn('IDB save failed', se); }
+      loadData(data, false);
+    } catch(err) { alert('שגיאה בקריאת הקובץ: ' + err.message); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function clearData() {
+  clearIDB().catch(()=>{});
+  allReports = [];
+  currentViewHtml = '';
+  exportMeta = {};
+  Object.keys(htmlMap).forEach(k => delete htmlMap[k]);
+  document.getElementById('welcomeDiv').style.display = '';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('btnClear').style.display = 'none';
+  document.getElementById('btnPrint').style.display = 'none';
+  document.getElementById('headerSub').textContent = 'טען קובץ JSON שיוצא מהאפליקציה';
+  document.getElementById('fileInput').value = '';
+}
+
+window.addEventListener('load', async () => {
+  try {
+    const saved = await readIDB();
+    if (saved && saved.reports && saved.reports.length) loadData(saved, true);
+  } catch(e) {}
+});
+
+function initDashboard() {
+  document.getElementById('welcomeDiv').style.display = 'none';
+  document.getElementById('dashboard').style.display = '';
+  document.getElementById('btnClear').style.display = '';
+  document.getElementById('btnPrint').style.display = '';
+
+  const count = allReports.length;
+  const bases = new Set(allReports.map(r => r.baseReportNumber)).size;
+  document.getElementById('headerSub').textContent =
+    `בודק: ${exportMeta.inspector} | יצוא: ${exportMeta.date} | ${count} גרסאות / ${bases} תסקירים`;
+
+  buildStats();
+  buildFilterChips();
+  applyFilters();
+}
+
+function buildStats() {
+  const bases = new Set(allReports.map(r => r.baseReportNumber)).size;
+  const clients = new Set(allReports.map(r => r.client).filter(Boolean)).size;
+  const typeCounts = {};
+  allReports.forEach(r => {
+    const t = r.receiverType || 'קולט אוויר';
+    typeCounts[t] = (typeCounts[t] || 0) + 1;
+  });
+
+  let html = `
+    <div class="stat-card"><div class="stat-num">${bases}</div><div class="stat-label">תסקירים</div></div>
+    <div class="stat-card"><div class="stat-num">${allReports.length}</div><div class="stat-label">גרסאות</div></div>
+    <div class="stat-card"><div class="stat-num">${clients}</div><div class="stat-label">לקוחות</div></div>`;
+  for (const [type, cnt] of Object.entries(typeCounts)) {
+    html += `<div class="stat-card"><div class="stat-num">${cnt}</div><div class="stat-label">${type}</div></div>`;
+  }
+  document.getElementById('statsBar').innerHTML = html;
+}
+
+function buildFilterChips() {
+  const types = ['הכל', ...new Set(allReports.map(r => r.receiverType || 'קולט אוויר'))];
+  const html = types.map(t => {
+    const safe = t.replace(/'/g, '&#39;');
+    return `<button class="chip ${t === activeTypeFilter ? 'active' : ''}" onclick="setTypeFilter('${safe}')">${t}</button>`;
+  }).join('');
+  document.getElementById('filterChips').innerHTML = html;
+}
+
+function setTypeFilter(type) {
+  activeTypeFilter = type;
+  buildFilterChips();
+  applyFilters();
+}
+
+function esc(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function applyFilters() {
+  const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+
+  const byBase = {};
+  allReports.forEach(r => {
+    const key = r.baseReportNumber || r.versionName;
+    if (!byBase[key]) byBase[key] = { latest: r, versions: [] };
+    byBase[key].versions.push(r);
+    byBase[key].latest = r;
+  });
+
+  const bases = Object.values(byBase).sort((a, b) => {
+    const na = parseInt((a.latest.baseReportNumber||'').replace(/\D/g,'')) || 0;
+    const nb = parseInt((b.latest.baseReportNumber||'').replace(/\D/g,'')) || 0;
+    return nb - na;
+  });
+
+  const filtered = bases.filter(g => {
+    const r = g.latest;
+    if (activeTypeFilter !== 'הכל' && (r.receiverType || 'קולט אוויר') !== activeTypeFilter) return false;
+    if (q) {
+      const hay = [r.baseReportNumber, r.client, r.receiverType, r.serialNumber,
+                   r.manufacturer, r.model, r.receiverDescription].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const tbody = document.getElementById('reportsTbody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr id="emptyRow"><td colspan="10">אין תסקירים להצגה</td></tr>';
+    return;
+  }
+
+  // Build rows — pass only versionName as key, HTML content lives in htmlMap
+  tbody.innerHTML = filtered.map(g => {
+    const r = g.latest;
+    const versionChips = g.versions.map(v =>
+      `<span class="version-chip" onclick="openReport('${esc(v.versionName)}')">${esc(v.versionName)}</span>`
+    ).join('');
+    const inspType = r.inspectionType || '';
+    const badge = inspType.includes('מיוחד')
+      ? `<span class="badge-type badge-special">${esc(inspType)}</span>`
+      : `<span class="badge-type badge-periodic">${esc(inspType)}</span>`;
+    return `<tr>
+      <td><span class="report-num" onclick="openReport('${esc(r.versionName)}')">${esc(r.baseReportNumber)}</span></td>
+      <td style="white-space:nowrap">${esc(r.date) || '—'}</td>
+      <td><strong>${esc(r.client) || '—'}</strong></td>
+      <td><span class="badge-type">${esc(r.receiverType) || 'קולט אוויר'}</span></td>
+      <td>${esc(r.serialNumber) || '—'}</td>
+      <td>${esc(r.volumeLiters) || '—'}</td>
+      <td>${r.designPressureBar ? esc(r.designPressureBar) + ' בר' : '—'}</td>
+      <td>${badge}</td>
+      <td style="white-space:nowrap">${esc(r.nextInspectionDate) || '—'}</td>
+      <td>${versionChips}</td>
+    </tr>`;
+  }).join('');
+}
+
+const PAGE_BREAK_CSS='<style>@media screen{.pageBreak{height:24px!important;overflow:visible!important;border-top:2px dashed #bbb;margin:20px 0;background:#f5f5f5;display:block!important;}}</style>';
+
+function openReport(versionName) {
+  document.getElementById('panelTitle').textContent = 'תסקיר ' + versionName;
+  const iframe = document.getElementById('panelIframe');
+  currentViewHtml = htmlMap[versionName] || '';
+  if (!currentViewHtml) {
+    document.getElementById('panelPrintBtn').style.display = 'none';
+    iframe.srcdoc = '<div dir="rtl" style="font-family:Arial;text-align:center;padding:60px 20px;color:#555"><p>אין תוכן HTML זמין</p></div>';
+  } else {
+    document.getElementById('panelPrintBtn').style.display = 'inline-block';
+    const html = currentViewHtml.replace(/<\/head>/i, PAGE_BREAK_CSS + '</head>');
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    iframe.onload = () => URL.revokeObjectURL(url);
+    iframe.src = url;
+  }
+  document.getElementById('previewPanel').classList.add('open');
+}
+
+function printFromPanel() {
+  if (!currentViewHtml) return;
+  const style='<style>@page{margin:15mm;}'
+    +'@media screen{html{background:#9e9e9e;}body{max-width:210mm;margin:24px auto;padding:15mm;box-sizing:border-box;background:white;box-shadow:0 3px 14px rgba(0,0,0,0.4);}'
+    +'.pageBreak{page-break-before:always!important;height:40px!important;overflow:visible!important;background:#9e9e9e!important;display:block!important;margin:0 -15mm!important;width:calc(100% + 30mm)!important;border:none!important;}}'
+    +'@media print{body{max-width:none!important;margin:0!important;padding:0!important;box-shadow:none!important;}.pageBreak{height:0!important;background:transparent!important;}}'
+    +'</style>';
+  const html = currentViewHtml.replace(/<\/head>/i, style + '</head>');
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const win = window.open(url, '_blank');
+  if (win) win.addEventListener('load', () => { win.focus(); win.print(); setTimeout(() => URL.revokeObjectURL(url), 10000); });
+}
+
+function closePanel() {
+  document.getElementById('previewPanel').classList.remove('open');
+  document.getElementById('panelPrintBtn').style.display = 'none';
+  currentViewHtml = '';
+  setTimeout(() => { document.getElementById('panelIframe').src = 'about:blank'; }, 300);
+}
+document.getElementById('previewPanel').addEventListener('click', function(e) {
+  if (e.target === this) closePanel();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+</script>
+</body>
+</html>

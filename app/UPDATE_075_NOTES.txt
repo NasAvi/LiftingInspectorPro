@@ -1,0 +1,18 @@
+Update 075 - Smart accessory field types
+
+- Added new smart accessory field input types:
+  * Multiline text
+  * Date
+  * Yes/No checkbox
+  * Read-only result field
+- Existing field types remain unchanged:
+  * Text
+  * Uppercase text
+  * Integer
+  * Decimal
+  * Dropdown list
+- Date fields open a date picker and save in dd/MM/yyyy format.
+- Yes/No fields are displayed as checkboxes and store כן/לא.
+- Read-only fields are intended for calculated formula results and can still be filled by the smart calculation engine.
+- Added explanatory text in the smart accessory form builder.
+- Did not change PDF generation, customer memory, machine memory, accessory reusable templates, or backup/restore logic.

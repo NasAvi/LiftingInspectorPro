@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מנהל תסקירים — ציוד הרמה</title>
+<style>
+:root {
+  --green-deep: #1B5E20;
+  --green-mid:  #2E7D32;
+  --green-soft: #E8F5E9;
+  --teal:       #00695C;
+  --teal-soft:  #E0F2F1;
+  --surface:    #F4F6F3;
+  --card:       #FFFFFF;
+  --border:     #D6DCD4;
+  --ink:        #1C2117;
+  --ink-2:      #4A5248;
+  --ink-3:      #7C8A78;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --green-deep: #388E3C;
+    --green-mid:  #4CAF50;
+    --green-soft: #1A2E1C;
+    --teal:       #26A69A;
+    --teal-soft:  #0D2320;
+    --surface:    #121712;
+    --card:       #1A201A;
+    --border:     #2A352A;
+    --ink:        #E6EDE4;
+    --ink-2:      #9EAB9A;
+    --ink-3:      #5E6E5A;
+  }
+}
+:root[data-theme="dark"] {
+  --green-deep: #388E3C;
+  --green-mid:  #4CAF50;
+  --green-soft: #1A2E1C;
+  --teal:       #26A69A;
+  --teal-soft:  #0D2320;
+  --surface:    #121712;
+  --card:       #1A201A;
+  --border:     #2A352A;
+  --ink:        #E6EDE4;
+  --ink-2:      #9EAB9A;
+  --ink-3:      #5E6E5A;
+}
+
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  font-family: -apple-system, "Segoe UI", Arial, sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  direction: rtl;
+}
+
+/* ── Header ── */
+.hdr {
+  background: var(--green-deep);
+  color: #fff;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  flex-shrink: 0;
+}
+.hdr svg { flex-shrink: 0; opacity: .9; }
+.hdr h1 { font-size: 16px; font-weight: 600; letter-spacing: .02em; }
+.hdr .sub { font-size: 11px; opacity: .6; margin-right: auto; }
+
+/* ── Layout ── */
+.body { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--card);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.sb-section { padding: 14px 14px 0; }
+.sb-section:last-child { padding-bottom: 14px; margin-top: auto; }
+.sb-section + .sb-section { padding-top: 12px; }
+.sb-section h2 {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+.sb-divider { height: 1px; background: var(--border); margin: 14px 0 0; }
+
+/* Drop zone */
+.dropzone {
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  padding: 16px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.dropzone:hover, .dropzone.over {
+  border-color: var(--green-mid);
+  background: var(--green-soft);
+}
+.dropzone svg { opacity: .55; }
+.dropzone .dz-label { font-size: 12px; font-weight: 600; color: var(--green-mid); }
+.dropzone .dz-hint { font-size: 11px; color: var(--ink-3); line-height: 1.5; }
+#fileInput { display: none; }
+
+/* Stat chips */
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  background: var(--surface);
+  margin-bottom: 5px;
+}
+.stat-row .lbl { color: var(--ink-2); }
+.stat-row .val { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); }
+.stat-row.m .val { color: var(--green-mid); }
+.stat-row.a .val { color: var(--teal); }
+
+/* Category buttons */
+.cat-btn {
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background .12s, color .12s;
+  margin-bottom: 4px;
+}
+.cat-btn:hover { background: var(--surface); }
+.cat-btn.active { background: var(--green-soft); color: var(--green-deep); font-weight: 600; }
+.cat-btn.active.air { background: var(--teal-soft); color: var(--teal); }
+.cat-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--green-mid);
+}
+.cat-badge {
+  margin-right: auto;
+  background: var(--border);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.cat-btn.active .cat-badge { background: var(--green-mid); color: #fff; }
+.cat-btn.active.air .cat-badge { background: var(--teal); color: #fff; }
+
+/* Load info */
+.load-info {
+  font-size: 11px;
+  color: var(--ink-3);
+  line-height: 1.7;
+  padding: 0 14px 14px;
+}
+
+/* ── Main content ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 14px;
+  gap: 10px;
+}
+
+/* Toolbar */
+.toolbar { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.search-wrap { flex: 1; position: relative; }
+.search-wrap input {
+  width: 100%;
+  padding: 8px 12px 8px 32px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--ink);
+  font-size: 13px;
+  outline: none;
+  transition: border-color .15s;
+}
+.search-wrap input:focus {
+  border-color: var(--green-mid);
+  box-shadow: 0 0 0 2px rgba(46,125,50,.12);
+}
+.search-wrap input::placeholder { color: var(--ink-3); }
+.search-icon {
+  position: absolute;
+  left: 9px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-3);
+  pointer-events: none;
+}
+.result-count { font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+
+/* Table */
+.tbl-wrap {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+}
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  position: sticky; top: 0; z-index: 1;
+  background: var(--card);
+  border-bottom: 2px solid var(--border);
+  padding: 9px 12px;
+  text-align: right;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--ink-3);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+th:hover { color: var(--ink); }
+th.sorted-asc::after  { content: " ▲"; font-size: 9px; }
+th.sorted-desc::after { content: " ▼"; font-size: 9px; }
+th.sorted-asc, th.sorted-desc { color: var(--green-mid); }
+td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface); }
+
+.num { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--green-deep); white-space: nowrap; }
+.num.air { color: var(--teal); }
+.client { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mtype  { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); font-size: 12px; }
+.date-c { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink-2); font-size: 12px; }
+
+.badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.badge.yes     { background: var(--green-soft); color: var(--green-deep); }
+.badge.yes.air { background: var(--teal-soft);  color: var(--teal); }
+.badge.no      { background: var(--surface);     color: var(--ink-3); }
+
+.open-btn {
+  padding: 4px 11px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1.5px solid var(--green-mid);
+  background: transparent;
+  color: var(--green-mid);
+  transition: background .12s, color .12s;
+  white-space: nowrap;
+}
+.open-btn:hover             { background: var(--green-mid); color: #fff; }
+.open-btn.air               { border-color: var(--teal); color: var(--teal); }
+.open-btn.air:hover         { background: var(--teal); color: #fff; }
+.open-btn:disabled          { opacity: .35; cursor: default; }
+.open-btn:disabled:hover    { background: transparent; color: var(--green-mid); }
+.open-btn.air:disabled:hover{ background: transparent; color: var(--teal); }
+
+/* Placeholder */
+.placeholder-row td { padding: 50px; text-align: center; color: var(--ink-3); }
+.placeholder-row p  { font-size: 13px; line-height: 1.7; max-width: 360px; margin: 10px auto 0; }
+
+/* ── Modal ── */
+.overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.52);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: var(--card);
+  border-radius: 10px;
+  width: 92vw; max-width: 1120px; height: 90vh;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,.35);
+}
+.modal-hdr {
+  display: flex; align-items: center;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 10px; flex-shrink: 0;
+}
+.modal-title { font-size: 14px; font-weight: 600; flex: 1; direction: rtl; }
+.modal-acts  { display: flex; gap: 8px; }
+.mbtn {
+  padding: 6px 13px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  border: none;
+  transition: opacity .12s;
+}
+.mbtn:hover      { opacity: .82; }
+.mbtn.print      { background: var(--green-deep); color: #fff; }
+.mbtn.close      { background: var(--surface); color: var(--ink); border: 1px solid var(--border); }
+.report-frame    { flex: 1; border: none; background: #fff; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(70px);
+  background: var(--ink);
+  color: #fff;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  z-index: 300;
+  transition: transform .22s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,.22);
+  direction: rtl;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* Scrollbar */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="hdr">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <path d="M9 9h6M9 12h6M9 15h4"/>
+  </svg>
+  <h1>מנהל תסקירים — ציוד הרמה</h1>
+  <span class="sub">בדיקת מכונות הרמה וקולטי אוויר</span>
+</header>
+
+<!-- ── BODY ── -->
+<div class="body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-section">
+      <div class="dropzone" id="dz" onclick="document.getElementById('fileInput').click()">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--green-mid)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <span class="dz-label">טען קבצי ייצוא</span>
+        <span class="dz-hint">JSON מטא-דאטה + קבצי HTML<br>לחץ כאן או גרור לחלון</span>
+      </div>
+      <input type="file" id="fileInput" multiple accept=".json,.html">
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <div class="sb-section">
+      <h2>סיכום</h2>
+      <div class="stat-row"><span class="lbl">סה"כ תסקירים</span><span class="val" id="cnt-total">0</span></div>
+      <div class="stat-row m"><span class="lbl">מכונות הרמה</span><span class="val" id="cnt-mach">0</span></div>
+      <div class="stat-row a"><span class="lbl">קולטי אוויר</span><span class="val" id="cnt-air">0</span></div>
+      <div class="stat-row"><span class="lbl">עם תסקיר HTML</span><span class="val" id="cnt-html">0</span></div>
+    </div>
+
+    <div class="sb-divider"></div>
+
+    <div class="sb-section">
+      <h2>קטגוריה</h2>
+      <button class="cat-btn active" data-tab="machines" onclick="setTab('machines')">
+        <span class="cat-dot"></span>
+        מכונות הרמה
+        <span class="cat-badge" id="bdg-mach">0</span>
+      </button>
+      <button class="cat-btn" data-tab="air" onclick="setTab('air')">
+        <span class="cat-dot" style="background:var(--teal)"></span>
+        קולטי אוויר
+        <span class="cat-badge" id="bdg-air">0</span>
+      </button>
+    </div>
+
+    <div class="sb-divider"></div>
+    <div class="load-info" id="load-info">
+      לא נטענו קבצים<br>
+      ייצא מהאפליקציה בנייד ▸<br>
+      העבר ל-PC דרך USB
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" id="search-inp"
+               placeholder="חיפוש: מספר תסקיר, לקוח, סוג, תאריך..."
+               oninput="onSearch(this.value)">
+      </div>
+      <span class="result-count" id="result-count"></span>
+    </div>
+
+    <div class="tbl-wrap">
+      <table id="main-tbl">
+        <thead>
+          <tr>
+            <th data-col="versionName" onclick="setSort('versionName')">מספר תסקיר</th>
+            <th data-col="client"      onclick="setSort('client')">לקוח / מפעל</th>
+            <th data-col="typeField"   id="th-type" onclick="setSort('typeField')">סוג מכונה</th>
+            <th data-col="date"        onclick="setSort('date')">תאריך בדיקה</th>
+            <th>קובץ HTML</th>
+            <th>צפייה</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body">
+          <tr class="placeholder-row">
+            <td colspan="6">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--ink-3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto;display:block">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <p>
+                <strong>טען קבצי ייצוא כדי להתחיל</strong><br>
+                1. בנייד: "ייצוא מטא-דאטה תסקירים למחשב" ← קובץ JSON<br>
+                2. בנייד: "ייצוא קבצי HTML תסקירים למחשב" ← קבצי HTML<br>
+                3. העבר ל-PC דרך USB<br>
+                4. גרור את כל הקבצים לחלון זה, או לחץ "טען קבצי ייצוא"
+              </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- ── MODAL ── -->
+<div class="overlay" id="overlay" onclick="maybeClose(event)">
+  <div class="modal" id="modal">
+    <div class="modal-hdr">
+      <span class="modal-title" id="modal-title">תסקיר</span>
+      <div class="modal-acts">
+        <button class="mbtn print" onclick="doPrint()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="vertical-align:-2px;margin-left:4px">
+            <path d="M6 9V2h12v7"/>
+            <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+            <rect x="6" y="14" width="12" height="8"/>
+          </svg>
+          הדפס
+        </button>
+        <button class="mbtn close" onclick="closeModal()">&#x2715; סגור</button>
+      </div>
+    </div>
+    <iframe class="report-frame" id="report-frame"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-modals"></iframe>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+// ── State ───────────────────────────────────────────────────────────────────
+const db = { machines: [], air: [], html: {} };
+let tab        = "machines";
+let query      = "";
+let sortCol    = "date";
+let sortDir    = -1;
+let blobUrl           = null;
+let currentReportName = null;
+let totalFiles        = 0;
+let lastLoad          = null;
+
+// ── File handling ────────────────────────────────────────────────────────────
+function handleFiles(files) {
+  const arr = Array.from(files);
+  if (!arr.length) return;
+  const tasks = arr.map(f => {
+    const name = f.name.toLowerCase();
+    if (name.endsWith(".json")) return readJson(f);
+    if (name.endsWith(".html")) return readHtml(f);
+    return Promise.resolve();
+  });
+  Promise.all(tasks).then(() => {
+    totalFiles += arr.length;
+    lastLoad = new Date();
+    render();
+    toast("נטענו " + arr.length + " קבצים");
+  });
+}
+
+function readJson(file) {
+  return new Promise(resolve => {
+    const fr = new FileReader();
+    fr.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!Array.isArray(data.reports)) { resolve(); return; }
+        data.reports.forEach(r => {
+          if (!r.versionName) return;
+          const base = {
+            baseReportNumber: r.baseReportNumber || r.versionName,
+            versionName:      r.versionName,
+            date:             r.date   || "",
+            client:           r.client || "",
+          };
+          if ("machineType" in r) {
+            // Machine export
+            const entry = {
+              ...base,
+              typeField:     r.machineType    || "",
+              licenseNumber: r.licenseNumber  || "",
+              kind:          "machines"
+            };
+            const idx = db.machines.findIndex(m => m.versionName === r.versionName);
+            if (idx >= 0) db.machines[idx] = entry; else db.machines.push(entry);
+          } else {
+            // Air receiver export
+            const entry = {
+              ...base,
+              typeField:    r.receiverType || "קולט אוויר",
+              serialNumber: r.serialNumber || "",
+              kind:         "air"
+            };
+            const idx = db.air.findIndex(a => a.versionName === r.versionName);
+            if (idx >= 0) db.air[idx] = entry; else db.air.push(entry);
+          }
+        });
+      } catch (_) {}
+      resolve();
+    };
+    fr.readAsText(file, "UTF-8");
+  });
+}
+
+function readHtml(file) {
+  return new Promise(resolve => {
+    const fr = new FileReader();
+    fr.onload = e => {
+      const key = file.name.replace(/\.html$/i, "");
+      db.html[key] = e.target.result;
+      resolve();
+    };
+    fr.readAsText(file, "UTF-8");
+  });
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function render() {
+  renderStats();
+  renderTable();
+}
+
+function renderStats() {
+  const mc = db.machines.length;
+  const ac = db.air.length;
+  const hc = [...db.machines, ...db.air].filter(r => !!db.html[r.versionName]).length;
+  el("cnt-total").textContent = mc + ac;
+  el("cnt-mach").textContent  = mc;
+  el("cnt-air").textContent   = ac;
+  el("cnt-html").textContent  = hc;
+  el("bdg-mach").textContent  = mc;
+  el("bdg-air").textContent   = ac;
+  if (lastLoad) {
+    el("load-info").innerHTML =
+      "נטענו " + totalFiles + " קבצים<br>" +
+      mc + " מכונות, " + ac + " קולטי אוויר<br>" +
+      hc + " עם HTML ✓<br>" +
+      "שעת טעינה: " + lastLoad.toLocaleTimeString("he-IL");
+  }
+}
+
+function getRows() {
+  const list = (tab === "machines" ? db.machines : db.air).map(r => ({
+    ...r, hasHtml: !!db.html[r.versionName]
+  }));
+  const q = query.toLowerCase().trim();
+  const filtered = q
+    ? list.filter(r =>
+        r.versionName.toLowerCase().includes(q) ||
+        r.baseReportNumber.toLowerCase().includes(q) ||
+        r.client.toLowerCase().includes(q) ||
+        r.date.includes(q) ||
+        r.typeField.toLowerCase().includes(q)
+      )
+    : list;
+  return filtered.sort((a, b) => {
+    let va = a[sortCol] || "", vb = b[sortCol] || "";
+    if (sortCol === "date") { va = dateKey(va); vb = dateKey(vb); }
+    return sortDir * (va < vb ? -1 : va > vb ? 1 : 0);
+  });
+}
+
+function dateKey(s) {
+  const [d, m, y] = (s || "").split("/");
+  return (y || "0000") + (m || "00") + (d || "00");
+}
+
+function renderTable() {
+  const rows  = getRows();
+  const isAir = tab === "air";
+  const tbody = el("tbl-body");
+  el("result-count").textContent = rows.length ? rows.length + " תסקירים" : "";
+
+  if (!rows.length) {
+    tbody.innerHTML =
+      '<tr class="placeholder-row"><td colspan="6"><p>' +
+      (query ? "לא נמצאו תסקירים התואמים לחיפוש" : "לא נטענו תסקירים לקטגוריה זו") +
+      '</p></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const numCls  = "num"      + (isAir ? " air" : "");
+    const openCls = "open-btn" + (isAir ? " air" : "");
+    const badgeCls = "badge "  + (r.hasHtml ? "yes" + (isAir ? " air" : "") : "no");
+    const dis = r.hasHtml ? "" : 'disabled title="יש לטעון קובץ HTML"';
+    return '<tr>' +
+      '<td><span class="' + numCls  + '">' + esc(r.versionName)      + '</span></td>' +
+      '<td class="client" title="' + esc(r.client) + '">'  + esc(r.client   || "—") + '</td>' +
+      '<td class="mtype"  title="' + esc(r.typeField) + '">' + esc(r.typeField || "—") + '</td>' +
+      '<td class="date-c">' + esc(r.date || "—") + '</td>' +
+      '<td><span class="' + badgeCls + '">' + (r.hasHtml ? "יש ✓" : "אין") + '</span></td>' +
+      '<td><button class="' + openCls + '" onclick="openReport(\'' + esc(r.versionName) + '\')" ' + dis + '>פתח תסקיר</button></td>' +
+      '</tr>';
+  }).join("");
+}
+
+// ── Tab & sort ───────────────────────────────────────────────────────────────
+function setTab(t) {
+  tab = t;
+  document.querySelectorAll(".cat-btn").forEach(b => {
+    const active = b.dataset.tab === t;
+    b.classList.toggle("active", active);
+    b.classList.toggle("air",    active && t === "air");
+  });
+  el("th-type").textContent = t === "machines" ? "סוג מכונה" : "סוג קולט";
+  render();
+}
+
+function setSort(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = -1; }
+  document.querySelectorAll("th").forEach(th => {
+    th.classList.remove("sorted-asc", "sorted-desc");
+    if (th.dataset.col === col)
+      th.classList.add(sortDir === 1 ? "sorted-asc" : "sorted-desc");
+  });
+  renderTable();
+}
+
+function onSearch(v) {
+  query = v;
+  renderTable();
+}
+
+// ── Report viewer ─────────────────────────────────────────────────────────────
+function openReport(versionName) {
+  const html = db.html[versionName];
+  if (!html) { toast("קובץ HTML לא נמצא"); return; }
+  currentReportName = versionName;
+  if (blobUrl) URL.revokeObjectURL(blobUrl);
+  const blob = new Blob([html], { type: "text/html; charset=utf-8" });
+  blobUrl = URL.createObjectURL(blob);
+  el("modal-title").textContent = "תסקיר " + versionName;
+  el("report-frame").src = blobUrl;
+  el("overlay").classList.add("open");
+}
+
+function closeModal() {
+  el("overlay").classList.remove("open");
+  el("report-frame").src = "";
+  currentReportName = null;
+  if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; }
+}
+
+function maybeClose(e) {
+  if (e.target === el("overlay")) closeModal();
+}
+
+function doPrint() {
+  const iframe = el("report-frame");
+  const iwin   = iframe.contentWindow;
+  const idoc   = iframe.contentDocument;
+  if (!iwin || !idoc || !idoc.body) { toast("לא נפתח תסקיר להדפסה"); return; }
+  try {
+    // Inject @page margin into the LIVE iframe document — identical context to right-click → Print.
+    // This avoids browsers reusing a cached "no-margin" setting from a different window context.
+    const prev = idoc.getElementById('_vpf_');
+    if (prev) prev.remove();
+    const s = idoc.createElement('style');
+    s.id  = '_vpf_';
+    s.textContent = '@page{margin:1.5cm}';
+    (idoc.head || idoc.documentElement).appendChild(s);
+    iwin.focus();
+    iwin.print();
+  } catch (e) {
+    toast("לא ניתן להדפיס — נסה קליק ימני ← הדפס");
+  }
+}
+
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+// ── Drag & drop (whole window) ────────────────────────────────────────────────
+document.addEventListener("dragover", e => {
+  e.preventDefault();
+  el("dz").classList.add("over");
+});
+document.addEventListener("dragleave", e => {
+  if (!e.relatedTarget) el("dz").classList.remove("over");
+});
+document.addEventListener("drop", e => {
+  e.preventDefault();
+  el("dz").classList.remove("over");
+  if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+});
+el("fileInput").addEventListener("change", e => {
+  handleFiles(e.target.files);
+  e.target.value = "";
+});
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function el(id) { return document.getElementById(id); }
+function esc(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+function toast(msg) {
+  const t = el("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+// Init sort indicator
+document.querySelector('[data-col="date"]').classList.add("sorted-desc");
+</script>
+</body>
+</html>

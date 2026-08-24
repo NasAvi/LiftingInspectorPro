@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ניהול בדיקות הרמה — מחשב</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:#1a1a2e;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+.hero{text-align:center;margin-bottom:40px;}
+.hero h1{font-size:26px;font-weight:bold;color:white;margin-bottom:8px;}
+.hero p{font-size:14px;color:rgba(255,255,255,0.6);}
+.sections{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;max-width:720px;}
+.section-card{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:24px;min-width:300px;flex:1;}
+.section-card.accessories{border-top:4px solid #43A047;}
+.section-card.machines{border-top:4px solid #1565C0;}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.section-icon{font-size:32px;}
+.section-header h2{font-size:18px;font-weight:bold;color:white;}
+.section-header p{font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;}
+.tool-btn{display:flex;align-items:center;gap:10px;width:100%;padding:13px 16px;border:none;border-radius:10px;cursor:pointer;font-size:14px;font-family:Arial;text-decoration:none;color:white;margin-bottom:8px;transition:all 0.18s;text-align:right;}
+.tool-btn:last-child{margin-bottom:0;}
+.tool-btn.green{background:#2E7D32;}
+.tool-btn.green:hover{background:#1B5E20;}
+.tool-btn.blue{background:#1565C0;}
+.tool-btn.blue:hover{background:#0D47A1;}
+.tool-btn .icon{font-size:18px;min-width:24px;text-align:center;}
+.tool-btn .label{font-weight:bold;}
+.tool-btn .desc{font-size:11px;opacity:0.75;}
+.footer{margin-top:36px;font-size:12px;color:rgba(255,255,255,0.3);text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>כלי ניהול בדיקות הרמה</h1>
+  <p>ממשק מחשב — עריכת תבניות, צפייה בתסקירים ועוד</p>
+</div>
+
+<div class="sections">
+
+  <!-- אביזרי הרמה -->
+  <div class="section-card accessories">
+    <div class="section-header">
+      <span class="section-icon">🔗</span>
+      <div>
+        <h2>אביזרי הרמה</h2>
+        <p>מענבים, וווים, אוזני הרמה ועוד</p>
+      </div>
+    </div>
+
+    <a href="accessory_template_editor.html" class="tool-btn green">
+      <span class="icon">✏️</span>
+      <div>
+        <div class="label">עורך תבניות אביזרים</div>
+        <div class="desc">יצירה ועריכה נוחה של תבניות — ייצוא/ייבוא לנייד</div>
+      </div>
+    </a>
+
+    <a href="accessory_reports_manager.html" class="tool-btn green">
+      <span class="icon">📋</span>
+      <div>
+        <div class="label">מנהל תסקירים — אביזרים</div>
+        <div class="desc">צפייה, חיפוש והדפסה של תסקירים שיוצאו מהנייד</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- קולטי אוויר -->
+  <div class="section-card" style="border-top:4px solid #00796B;">
+    <div class="section-header">
+      <span class="section-icon">🌬️</span>
+      <div>
+        <h2>קולטי אוויר וקומפרסורים</h2>
+        <p>קולטי אוויר, מיכלי לחץ וקומפרסורים</p>
+      </div>
+    </div>
+
+    <a href="air_receiver_manager.html" class="tool-btn" style="background:#00796B;">
+      <span class="icon">📋</span>
+      <div>
+        <div class="label">מנהל תסקירים — קולטי אוויר</div>
+        <div class="desc">צפייה ב-תסקירים שיוצאו מהנייד — חיפוש, סינון, הדפסה</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- מכונות הרמה -->
+  <div class="section-card machines">
+    <div class="section-header">
+      <span class="section-icon">🏗️</span>
+      <div>
+        <h2>מכונות הרמה</h2>
+        <p>עגורנים, מלגזות, מנופים ועוד</p>
+      </div>
+    </div>
+
+    <a href="machine_template_editor.html" class="tool-btn blue">
+      <span class="icon">✏️</span>
+      <div>
+        <div class="label">עורך תבניות מכונות</div>
+        <div class="desc">יצירה ועריכה של תבניות מכונות הרמה</div>
+      </div>
+    </a>
+
+    <a href="machine_reports_manager.html" class="tool-btn blue">
+      <span class="icon">📋</span>
+      <div>
+        <div class="label">מנהל תסקירים — מכונות</div>
+        <div class="desc">צפייה, עריכה והדפסה של תסקירים שיוצאו מהנייד</div>
+      </div>
+    </a>
+  </div>
+
+</div>
+
+<div class="footer">
+  כל הכלים פועלים מהדפדפן — ללא שרת. קבצי JSON מועברים ידנית בין הנייד למחשב.
+</div>
+
+</body>
+</html>

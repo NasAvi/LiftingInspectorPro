@@ -1,0 +1,1197 @@
+<title>מדריך האפליקציה — תסקירי ציוד הרמה</title>
+<style>
+:root{
+  --g1:#1B5E20;--g2:#2E7D32;--g3:#E8F5E9;--g4:#43A047;
+  --teal:#00695C;--teal-s:#E0F2F1;
+  --amber:#BF5F00;--amber-s:#FFF3E0;
+  --blue:#1565C0;--blue-s:#E3F2FD;
+  --red:#B71C1C;--red-s:#FFEBEE;
+  --surface:#F3F5F1;--card:#FFFFFF;--border:#D0DAD0;
+  --ink:#1C2117;--ink2:#4A5248;--ink3:#7C8A78;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --surface:#0F1510;--card:#182018;--border:#263026;
+  --ink:#E4EBE2;--ink2:#8FA08B;--ink3:#5A6856;
+  --g3:#1A2E1C;--g1:#43A047;--g2:#388E3C;
+  --teal-s:#0D2320;--amber-s:#1F1200;--blue-s:#0D1B30;--red-s:#1A0808;
+}}
+:root[data-theme=dark]{
+  --surface:#0F1510;--card:#182018;--border:#263026;
+  --ink:#E4EBE2;--ink2:#8FA08B;--ink3:#5A6856;
+  --g3:#1A2E1C;--g1:#43A047;--g2:#388E3C;
+  --teal-s:#0D2320;--amber-s:#1F1200;--blue-s:#0D1B30;--red-s:#1A0808;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--surface);color:var(--ink);
+  font-family:-apple-system,"Segoe UI",Arial,sans-serif;direction:rtl}
+
+/* ── deck ── */
+.deck{height:100vh;display:flex;flex-direction:column}
+.prog-bar{height:3px;background:var(--border);flex-shrink:0}
+.prog-fill{height:100%;background:var(--g4);transition:width .3s}
+.slides{flex:1;position:relative;overflow:hidden}
+.slide{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.slide.on{opacity:1;pointer-events:auto}
+
+/* ── slide header ── */
+.shdr{
+  background:var(--g1);color:#fff;padding:10px 20px;
+  display:flex;align-items:center;gap:12px;flex-shrink:0;
+}
+.shdr .cap{font-size:10px;opacity:.65;letter-spacing:.1em;text-transform:uppercase}
+.shdr .stitle{font-size:17px;font-weight:700}
+.shdr .snum{margin-right:auto;font-size:11px;opacity:.55;font-variant-numeric:tabular-nums}
+
+/* ── slide body ── */
+.sbody{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+
+/* title slide */
+.title-slide .sbody{
+  align-items:center;justify-content:center;
+  background:linear-gradient(140deg,#1B5E20 0%,#2E7D32 55%,#00695C 100%);
+  color:#fff;text-align:center;gap:18px;
+}
+.t-ico{font-size:58px}
+.t-main{font-size:30px;font-weight:800;letter-spacing:.01em}
+.t-sub{font-size:16px;opacity:.82}
+.t-tags{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.t-tag{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);
+  border-radius:20px;padding:5px 16px;font-size:13px}
+.t-hint{font-size:12px;opacity:.55;margin-top:4px}
+
+/* ── nav ── */
+.nav{
+  background:var(--card);border-top:1px solid var(--border);
+  padding:9px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;
+}
+.nbtn{
+  padding:7px 16px;border:1.5px solid var(--g2);border-radius:6px;
+  background:transparent;color:var(--g2);font-size:12px;cursor:pointer;
+  transition:background .12s,color .12s;
+}
+.nbtn:hover{background:var(--g2);color:#fff}
+.nbtn:disabled{opacity:.28;cursor:default}
+.nbtn:disabled:hover{background:transparent;color:var(--g2)}
+.nind{flex:1;text-align:center;font-size:12px;color:var(--ink3);font-variant-numeric:tabular-nums}
+
+/* ── layout helpers ── */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* ── cards ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:13px}
+.card.green{border-color:var(--g4);background:var(--g3)}
+.card.amber{border-color:#FFAB40;background:var(--amber-s)}
+.card.teal {border-color:var(--teal);background:var(--teal-s)}
+.card.blue {border-color:#42A5F5;background:var(--blue-s)}
+.card.red  {border-color:#EF5350;background:var(--red-s)}
+
+/* ── typography ── */
+h2{font-size:14px;font-weight:700;color:var(--g1);margin-bottom:7px}
+.card.amber h2{color:var(--amber)}
+.card.teal  h2{color:var(--teal)}
+.card.blue  h2{color:var(--blue)}
+.card.red   h2{color:var(--red)}
+h3{font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:5px}
+p{font-size:13px;line-height:1.6;color:var(--ink2)}
+code{font-family:monospace;background:var(--surface);padding:1px 5px;border-radius:3px;font-size:12px}
+
+/* ── feature list ── */
+.fl{list-style:none;display:flex;flex-direction:column;gap:7px}
+.fl li{display:flex;align-items:flex-start;gap:7px;font-size:13px;line-height:1.5;color:var(--ink2)}
+.fl li::before{content:"✓";color:var(--g2);font-weight:700;flex-shrink:0;margin-top:1px}
+.fl li.req::before{content:"★";color:var(--amber)}
+.fl li.key::before{content:"◆";color:var(--teal)}
+.fl li.no::before{content:"→";color:var(--ink3)}
+
+/* ── badges ── */
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.badge.req{background:var(--amber-s);color:var(--amber);border:1px solid #FFAB40}
+.badge.key{background:var(--teal-s);color:var(--teal);border:1px solid var(--teal)}
+.badge.opt{background:var(--surface);color:var(--ink3);border:1px solid var(--border)}
+
+/* ── highlight strips ── */
+.hl{padding:10px 13px;border-radius:7px;border-right:4px solid var(--g2);
+  background:var(--g3);font-size:13px;line-height:1.6;color:var(--ink2)}
+.hl.warn{border-color:var(--amber);background:var(--amber-s)}
+.hl.info{border-color:var(--blue);background:var(--blue-s)}
+.hl.teal{border-color:var(--teal);background:var(--teal-s)}
+
+/* ── phone mockup ── */
+.pw{display:flex;justify-content:center}
+.ph{background:#1C2117;border-radius:26px;padding:13px 9px;
+  box-shadow:0 14px 42px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.07);
+  width:190px;flex-shrink:0}
+.ph-notch{background:#0a0e09;width:56px;height:14px;border-radius:7px;margin:0 auto 7px}
+.ph-sc{background:#fff;border-radius:16px;overflow:hidden;min-height:320px;direction:rtl}
+.psh{background:var(--g1);color:#fff;padding:7px 9px;font-size:10px;font-weight:700}
+.psb{padding:7px}
+.psbn{background:var(--g2);color:#fff;border-radius:5px;padding:6px 9px;
+  font-size:10px;margin-bottom:5px;text-align:center}
+.psbn.out{background:transparent;color:var(--g2);border:1.5px solid var(--g2)}
+.pssec{font-size:8.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin:7px 0 3px}
+.psrow{display:flex;justify-content:space-between;align-items:center;
+  padding:4px 3px;border-bottom:1px solid var(--border);font-size:9.5px;color:var(--ink)}
+.psf{border:1px solid var(--border);border-radius:3px;padding:3px 5px;
+  font-size:9.5px;margin-bottom:4px;background:var(--surface);color:var(--ink3)}
+
+/* ── step flow ── */
+.steps{display:flex;align-items:center;gap:0;flex-wrap:wrap}
+.step{display:flex;flex-direction:column;align-items:center;gap:5px;
+  min-width:90px;text-align:center}
+.step-n{width:34px;height:34px;border-radius:50%;background:var(--g2);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+.step-l{font-size:11px;color:var(--ink2);line-height:1.4}
+.sarr{color:var(--border);font-size:18px;padding:0 4px;margin-bottom:18px}
+
+/* ── export flow ── */
+.eflow{display:flex;align-items:stretch;gap:0}
+.estep{flex:1;padding:10px 8px;background:var(--card);border:1px solid var(--border);
+  border-radius:7px;text-align:center;display:flex;flex-direction:column;
+  align-items:center;gap:5px}
+.earr{display:flex;align-items:center;color:var(--border);font-size:18px;padding:0 3px}
+.eico{font-size:24px}
+.elbl{font-size:11px;font-weight:600;color:var(--ink)}
+.esub{font-size:10px;color:var(--ink3)}
+
+/* ── field type grid ── */
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px}
+.fitem{border:1px solid var(--border);border-radius:7px;padding:9px;
+  text-align:center;background:var(--card)}
+.fi-ico{font-size:20px;margin-bottom:5px}
+.fi-n{font-size:11px;font-weight:600;color:var(--ink)}
+.fi-d{font-size:10px;color:var(--ink3);margin-top:2px}
+
+/* PC mockup */
+.pcm{background:#2a2a2a;border-radius:10px;padding:8px;
+  box-shadow:0 12px 36px rgba(0,0,0,.22)}
+.pcm-bar{background:#1a1a1a;border-radius:5px 5px 0 0;height:18px;
+  display:flex;align-items:center;padding:0 7px;gap:4px}
+.pcm-dot{width:7px;height:7px;border-radius:50%}
+.pcm-sc{background:var(--surface);border-radius:0 0 5px 5px;padding:7px;min-height:170px}
+
+/* monospace path */
+.path{font-family:monospace;font-size:11px;background:var(--surface);
+  padding:8px 10px;border-radius:5px;line-height:1.8;color:var(--ink2)}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+
+<div class="deck">
+<div class="prog-bar"><div class="prog-fill" id="pf"></div></div>
+<div class="slides" id="slides">
+
+<!-- ══════════ 1 · כותרת ══════════ -->
+<div class="slide title-slide on" id="s0">
+  <div class="sbody">
+    <div class="t-ico">📋</div>
+    <div class="t-main">מנהל תסקירי בדיקה</div>
+    <div class="t-sub">ציוד הרמה · מכונות · קולטי אוויר</div>
+    <div class="t-tags">
+      <span class="t-tag">אביזרי הרמה</span>
+      <span class="t-tag">מכונות הרמה</span>
+      <span class="t-tag">קולטי אוויר</span>
+    </div>
+    <div style="font-size:14px;opacity:.7;margin-top:8px">מדריך שימוש מלא — כל מרכיבי האפליקציה</div>
+    <div class="t-hint">← חצי מקלדת לניווט · Enter / Space = הבא</div>
+  </div>
+</div>
+
+<!-- ══════════ 2 · תפריט ראשי ══════════ -->
+<div class="slide" id="s1">
+  <div class="shdr"><div><div class="cap">מבנה האפליקציה</div><div class="stitle">תפריט ראשי — סקירה כללית</div></div><div class="snum">2 / 20</div></div>
+  <div class="sbody">
+    <div class="row2">
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>שלושה ענפי בדיקה</h2>
+          <p>כל ענף עצמאי — תבניות, תסקירים, ייצוא וחידוש משלו.</p>
+        </div>
+        <div class="row3" style="margin-bottom:10px">
+          <div class="card green"><h2>אביזרי הרמה</h2><p style="font-size:11px">זרם מלא · טופס חכם · PDF</p></div>
+          <div class="card teal"><h2>מכונות הרמה</h2><p style="font-size:11px">תבניות מותאמות · רישוי</p></div>
+          <div class="card blue"><h2>קולטי אוויר</h2><p style="font-size:11px">לחצים · נפחים · בדיקות</p></div>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>פעולות גלובליות</h2>
+          <ul class="fl">
+            <li>הגדרות כלליות — בודק, חותמת, לוגו, צבעים, מספרי תסקיר</li>
+            <li>גיבוי ושחזור — כל הנתונים בקובץ ZIP</li>
+            <li>ייצוא תסקירים ותבניות למחשב</li>
+            <li>כפתור התנתקות (Firebase)</li>
+          </ul>
+        </div>
+        <div class="hl info">ⓘ שינויים בהגדרות הגלובליות (שם בודק, חותמת, לוגו) משפיעים רק על תסקירים חדשים — ישנים לא משתנים.</div>
+      </div>
+      <div class="pw">
+        <div class="ph"><div class="ph-notch"></div>
+          <div class="ph-sc">
+            <div class="psh">ניהול תסקירי בדיקה</div>
+            <div class="psb">
+              <div class="psbn">אביזרי הרמה</div>
+              <div class="psbn" style="background:var(--teal)">מכונות הרמה</div>
+              <div class="psbn" style="background:var(--blue)">קולטי אוויר וקומפרסורים</div>
+              <div style="height:8px"></div>
+              <div class="psbn out" style="font-size:9px">הגדרות כלליות (בודק, חתימה, צבעים...)</div>
+              <div class="psbn out" style="font-size:9px">גיבוי ושחזור נתוני אפליקציה</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 3 · זרימת אביזרים ══════════ -->
+<div class="slide" id="s2">
+  <div class="shdr"><div><div class="cap">אביזרי הרמה</div><div class="stitle">זרימת העבודה המלאה</div></div><div class="snum">3 / 20</div></div>
+  <div class="sbody">
+    <div class="card" style="padding:16px">
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div class="step-l">מסך הבית<br>אביזרי הרמה</div></div>
+        <div class="sarr">←</div>
+        <div class="step"><div class="step-n">2</div><div class="step-l">תסקיר חדש<br>(בחר תבנית)</div></div>
+        <div class="sarr">←</div>
+        <div class="step"><div class="step-n">3</div><div class="step-l">מילוי פרטים<br>ולקוח</div></div>
+        <div class="sarr">←</div>
+        <div class="step"><div class="step-n">4</div><div class="step-l">הוספת<br>אביזרים</div></div>
+        <div class="sarr">←</div>
+        <div class="step"><div class="step-n">5</div><div class="step-l">שמירה<br>+ PDF</div></div>
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>אפשרויות במסך הבית</h2>
+          <ul class="fl">
+            <li>תסקיר חדש — פתיחת טופס ריק</li>
+            <li>תסקירים שמורים — צפייה, שיתוף, הדפסה</li>
+            <li>חידוש תסקירים — עדכון בדיקה שנתית</li>
+            <li>רשימות — ניהול אוטוקומפליט</li>
+            <li>טופס חכם — עריכת תבנית</li>
+            <li>ייצוא מטא-דאטה / HTML למחשב</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>מספור תסקירים</h2>
+          <p>כל תסקיר מקבל מספר רץ אוטומטי, לדוגמה <code>R6168</code>. גרסאות נוספות: <code>R6168.1</code>, <code>R6168.2</code>…</p>
+        </div>
+      </div>
+      <div class="pw">
+        <div class="ph"><div class="ph-notch"></div>
+          <div class="ph-sc">
+            <div class="psh">אביזרי הרמה</div>
+            <div class="psb">
+              <div class="psbn">תסקיר חדש</div>
+              <div class="psbn out">תסקירים שמורים</div>
+              <div class="psbn out">חידוש תסקירי אביזרים</div>
+              <div class="psbn out">רשימות מותאמות אישית</div>
+              <div class="psbn out">טופס חכם (עריכת תבנית)</div>
+              <div class="psbn out" style="font-size:9px">ייצוא מטא-דאטה / HTML למחשב</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 4 · פרטים ראשיים ══════════ -->
+<div class="slide" id="s3">
+  <div class="shdr"><div><div class="cap">טופס בדיקה</div><div class="stitle">פרטים ראשיים — כותרת התסקיר</div></div><div class="snum">4 / 20</div></div>
+  <div class="sbody">
+    <div class="row2">
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>פרטי הבודק</h2>
+          <p style="margin-bottom:7px">מולאים אוטומטית מההגדרות. ניתן לעריכה בכל תסקיר.</p>
+          <ul class="fl">
+            <li class="req">שם הבודק המלא <span class="badge req">חובה</span></li>
+            <li class="req">מספר רישיון <span class="badge req">חובה</span></li>
+            <li>כתובת / חברה</li>
+            <li>טלפון</li>
+            <li>לוגו + חותמת + חתימה דיגיטלית</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>פרטי הלקוח</h2>
+          <ul class="fl">
+            <li class="req">שם לקוח / מפעל <span class="badge req">חובה</span></li>
+            <li>כתובת · איש קשר · טלפון</li>
+            <li>מספר הזמנה / פרויקט</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>מידע התסקיר</h2>
+          <ul class="fl">
+            <li class="req">מספר תסקיר — אוטומטי <span class="badge req">חובה</span></li>
+            <li class="req">תאריך בדיקה <span class="badge req">חובה</span></li>
+            <li>תאריך הבא לבדיקה — מחושב אוטומטי</li>
+            <li class="key">הערות כלליות <span class="badge key">מפתח</span></li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="pw" style="margin-bottom:10px">
+          <div class="ph"><div class="ph-notch"></div>
+            <div class="ph-sc">
+              <div class="psh">תסקיר בדיקה R6168</div>
+              <div class="psb">
+                <div class="pssec">פרטי בודק</div>
+                <div class="psf">שם הבודק: ניב וקנין</div>
+                <div class="psf">רישיון: 47135090</div>
+                <div class="pssec">פרטי לקוח</div>
+                <div class="psf">לקוח: #### ########</div>
+                <div class="psf">טלפון: ########</div>
+                <div class="pssec">פרטי תסקיר</div>
+                <div class="psf">מס׳ תסקיר: R6168</div>
+                <div class="psf">תאריך: 17/07/2026</div>
+                <div class="psf">הבא לבדיקה: 17/01/2027</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hl warn">★ שדות חובה חייבים להיות ממולאים לפני שמירת התסקיר והנפקת PDF — הקוד חוסם שמירה בהיעדרם.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 5 · טבלת האביזרים ══════════ -->
+<div class="slide" id="s4">
+  <div class="shdr"><div><div class="cap">טופס חכם</div><div class="stitle">טבלת האביזרים — הטופס החכם</div></div><div class="snum">5 / 20</div></div>
+  <div class="sbody">
+    <div class="row2">
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>מה זה הטופס החכם?</h2>
+          <p>טבלה דינמית שכל שורה מייצגת אביזר בדוק. מבנה העמודות נקבע על-ידי <strong>תבנית</strong> שיוצר הבודק ונשמרת לשימוש חוזר.</p>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>עמודות קבועות (ברירת מחדל)</h2>
+          <ul class="fl">
+            <li class="req">מספר — ממוספר אוטומטי</li>
+            <li class="req">תיאור האביזר</li>
+            <li class="req">יצרן ודגם</li>
+            <li class="req">כמות</li>
+            <li class="key">WLL — עומס עבודה בטוח <span class="badge key">מפתח</span></li>
+            <li>מספרי יחידות (סידורי)</li>
+            <li>הערות לאביזר</li>
+            <li>תמונות צמודות</li>
+          </ul>
+        </div>
+        <div class="hl">💡 מספר בלתי מוגבל של אביזרים. כל אביזר שורה עצמאית עם כל שדותיה.</div>
+      </div>
+      <div class="pw">
+        <div class="ph"><div class="ph-notch"></div>
+          <div class="ph-sc">
+            <div class="psh">טבלת אביזרים — R6168</div>
+            <div class="psb" style="padding:4px">
+              <div style="background:var(--g1);color:#fff;display:grid;grid-template-columns:20px 1fr 36px 28px;gap:2px;padding:4px;font-size:8.5px;border-radius:3px 3px 0 0">
+                <span>מס'</span><span>תיאור</span><span>WLL</span><span>כמ'</span>
+              </div>
+              <div style="display:grid;grid-template-columns:20px 1fr 36px 28px;gap:2px;padding:4px;border-bottom:1px solid var(--border);font-size:8.5px">
+                <span>1</span><span style="font-size:7.5px">מעגן שרשרת 13/8"</span><span>5.1</span><span>4</span>
+              </div>
+              <div style="display:grid;grid-template-columns:20px 1fr 36px 28px;gap:2px;padding:4px;border-bottom:1px solid var(--border);font-size:8.5px">
+                <span>2</span><span style="font-size:7.5px">מעגן שלוש זרועות</span><span>16/8</span><span>4</span>
+              </div>
+              <div style="display:grid;grid-template-columns:20px 1fr 36px 28px;gap:2px;padding:4px;border-bottom:1px solid var(--border);font-size:8.5px">
+                <span>3</span><span style="font-size:7.5px">מעגן שרשרת 20/8"</span><span>12</span><span>4</span>
+              </div>
+              <div style="background:var(--g3);padding:6px;text-align:center;margin-top:5px;border-radius:4px;font-size:9.5px;color:var(--g1);font-weight:700">+ הוסף אביזר חדש</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 6 · סוגי שדות ══════════ -->
+<div class="slide" id="s5">
+  <div class="shdr"><div><div class="cap">שדות קלט</div><div class="stitle">סוגי שדות הקלט בטופס</div></div><div class="snum">6 / 20</div></div>
+  <div class="sbody">
+    <div class="fgrid">
+      <div class="fitem"><div class="fi-ico">📝</div><div class="fi-n">טקסט חופשי</div><div class="fi-d">שם, תיאור, הערות</div></div>
+      <div class="fitem"><div class="fi-ico">🔢</div><div class="fi-n">מספרי</div><div class="fi-d">כמות, WLL, מידות, לחץ</div></div>
+      <div class="fitem"><div class="fi-ico">📅</div><div class="fi-n">תאריך</div><div class="fi-d">בדיקה, תוקף, תחזוקה</div></div>
+      <div class="fitem"><div class="fi-ico">▼</div><div class="fi-n">רשימת בחירה</div><div class="fi-d">סוג, מצב, תוצאה</div></div>
+      <div class="fitem"><div class="fi-ico">☑</div><div class="fi-n">כן / לא</div><div class="fi-d">קיים, עבר/נכשל</div></div>
+      <div class="fitem" style="border-color:var(--g4)"><div class="fi-ico">📷</div><div class="fi-n">מצלמה</div><div class="fi-d">צילום לוחית, פגמים</div></div>
+      <div class="fitem" style="border-color:var(--teal)"><div class="fi-ico">🔍</div><div class="fi-n">OCR</div><div class="fi-d">קריאה אופטית מלוחית</div></div>
+      <div class="fitem" style="border-color:var(--blue)"><div class="fi-ico">💡</div><div class="fi-n">אוטוקומפליט</div><div class="fi-d">לקוחות, יצרנים, דגמים</div></div>
+    </div>
+    <div class="row2">
+      <div class="hl teal">◆ <strong>OCR (ML Kit):</strong> צלם לוחית נתונים של האביזר ← המערכת מזהה אוטומטית יצרן, WLL, מספר סידורי ושנת ייצור וממלא שדות.</div>
+      <div class="hl">💡 <strong>אוטוקומפליט:</strong> המערכת זוכרת לקוחות, יצרנים ודגמים שהוזנו בעבר ומציעה אותם בהקלדה הבאה.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 7 · בניית תבנית ══════════ -->
+<div class="slide" id="s6">
+  <div class="shdr"><div><div class="cap">תבניות</div><div class="stitle">בניית תבנית — עריכת הטופס החכם</div></div><div class="snum">7 / 20</div></div>
+  <div class="sbody">
+    <div class="row2">
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>מה זו תבנית?</h2>
+          <p>תבנית מגדירה אילו שדות יופיעו לכל אביזר, באיזה סדר, וסוג הקלט. תבנית שונה לכל סוג ציוד (שרשרת, כבל, אביזר רגל, ווים).</p>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>יצירה / עריכת תבנית</h2>
+          <ol style="padding-right:16px;font-size:13px;line-height:2.1;color:var(--ink2)">
+            <li>לחץ "טופס חכם (עריכת תבנית)"</li>
+            <li>בחר תבנית קיימת או "חדשה"</li>
+            <li>הוסף / ערוך / מחק שדות</li>
+            <li>לכל שדה: שם · סוג · חובה / מפתח</li>
+            <li>שמור את התבנית</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h2>פעולות על תבניות</h2>
+          <ul class="fl">
+            <li>שכפול תבנית קיימת</li>
+            <li>ייצוא תבנית לקובץ JSON</li>
+            <li>ייבוא תבנית מקובץ JSON</li>
+            <li>שיתוף עם בודק אחר</li>
+          </ul>
+        </div>
+      </div>
+      <div class="pw">
+        <div class="ph"><div class="ph-notch"></div>
+          <div class="ph-sc">
+            <div class="psh">עריכת תבנית</div>
+            <div class="psb">
+              <div class="pssec">שדות התבנית</div>
+              <div class="psrow"><span>תיאור האביזר</span><span style="color:var(--amber);font-size:8.5px">★ חובה</span></div>
+              <div class="psrow"><span>יצרן / דגם</span><span style="color:var(--amber);font-size:8.5px">★ חובה</span></div>
+              <div class="psrow"><span>WLL (עומס בטוח)</span><span style="color:var(--teal);font-size:8.5px">◆ מפתח</span></div>
+              <div class="psrow"><span>מספר סידורי</span><span style="color:var(--ink3);font-size:8.5px">אופציונלי</span></div>
+              <div class="psrow"><span>מצב האביזר</span><span style="color:var(--ink3);font-size:8.5px">רשימה</span></div>
+              <div class="psrow"><span>צילום לוחית</span><span style="color:var(--ink3);font-size:8.5px">תמונה</span></div>
+              <div style="height:6px"></div>
+              <div class="psbn" style="font-size:9.5px">+ הוסף שדה חדש</div>
+              <div class="psbn out" style="font-size:9.5px">שמור תבנית</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 8 · שדות חובה ══════════ -->
+<div class="slide" id="s7">
+  <div class="shdr"><div><div class="cap">שדות חובה</div><div class="stitle">שדות חובה להנפקת תסקיר</div></div><div class="snum">8 / 20</div></div>
+  <div class="sbody">
+    <div class="hl warn" style="margin-bottom:4px">★ ללא שדות החובה האלה לא ניתן לשמור תסקיר ולהנפיק PDF — הקוד חוסם שמירה ומסמן את השדה החסר באדום.</div>
+    <div class="row3">
+      <div class="card red"><h2>פרטי הבודק</h2><ul class="fl"><li class="req">שם הבודק המלא</li><li class="req">מספר רישיון</li><li class="no">נשמרים בהגדרות ומולאים אוטומטית</li></ul></div>
+      <div class="card red"><h2>פרטי הלקוח</h2><ul class="fl"><li class="req">שם לקוח / מפעל</li><li class="no">שאר פרטי הלקוח אופציונליים</li></ul></div>
+      <div class="card red"><h2>תאריכים ומספר</h2><ul class="fl"><li class="req">תאריך הבדיקה</li><li class="req">מספר תסקיר (אוטומטי)</li><li class="no">תאריך הבא — מחושב אוטומטי</li></ul></div>
+    </div>
+    <div class="row2">
+      <div class="card amber">
+        <h2>שדות חובה בתבנית האביזר</h2>
+        <p style="margin-bottom:8px">בעריכת תבנית ניתן לסמן כל שדה כ"חובה" — חייב להיות ממולא בכל אביזר שנוסף.</p>
+        <ul class="fl"><li class="req">תיאור האביזר (ברירת מחדל)</li><li class="req">WLL (ברירת מחדל)</li><li class="req">כל שדה מסומן "חובה" בתבנית</li></ul>
+      </div>
+      <div class="card">
+        <h2>טיוטה ← שמירה ללא חובה</h2>
+        <ul class="fl">
+          <li>תסקיר "טיוטה" ניתן לשמור גם עם שדות חסרים</li>
+          <li>הטיוטה אינה נועלת להנפקה</li>
+          <li>ניתן לחזור ולהשלים שדות חסרים</li>
+          <li class="no">תסקיר מוגמר — כל שדות החובה חייבים להיות מלאים</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 9 · שדות מפתח ══════════ -->
+<div class="slide" id="s8">
+  <div class="shdr"><div><div class="cap">שדות מפתח</div><div class="stitle">שדות מפתח — WLL, ליקויים ויחידות</div></div><div class="snum">9 / 20</div></div>
+  <div class="sbody">
+    <div class="hl teal" style="margin-bottom:4px">◆ שדות מפתח אינם חובה טכנית אך הם הערכים הקריטיים לתוכן המקצועי של התסקיר.</div>
+    <div class="row2">
+      <div>
+        <div class="card teal" style="margin-bottom:10px">
+          <h2>WLL — עומס עבודה בטוח</h2>
+          <p style="margin-bottom:7px">הפורמט <code>5/45°</code> (טון/זווית) מזוהה ומפורסר אוטומטית:</p>
+          <div style="background:var(--card);border-radius:5px;overflow:hidden;font-size:11px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--teal);color:#fff;padding:4px 7px;gap:4px"><span>קלט</span><span>טונות</span><span>זווית</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:4px 7px;gap:4px;border-bottom:1px solid var(--border)"><span>5.1</span><span>5.1 t</span><span>—</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:4px 7px;gap:4px;border-bottom:1px solid var(--border)"><span>16.1/50°</span><span>16.1 t</span><span>50°</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:4px 7px;gap:4px"><span>11.5/120°</span><span>11.5 t</span><span>120°</span></div>
+          </div>
+        </div>
+        <div class="card teal" style="margin-bottom:10px">
+          <h2>מספרי ליקויים</h2>
+          <p>מספרי הליקויים שנמצאו בבדיקה — מיוצאים ברשימה נפרדת בתסקיר עם תאריכי מעקב.</p>
+        </div>
+        <div class="card teal">
+          <h2>מספרי יחידות</h2>
+          <p>מספרי הזיהוי של כל אביזר — מופיעים בטבלה ובנספח התמונות (ממוספרות לפיהם).</p>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>הגדרת שדה כ"מפתח" בתבנית</h2>
+          <ul class="fl">
+            <li class="key">מוצג בולט בראש כל שורת אביזר</li>
+            <li class="key">כלול בכותרת ובסיכום הדוח</li>
+            <li class="key">ניתן לחיפוש וסינון מהיר</li>
+            <li class="key">מופיע בגריד תמונות עם הכינוי</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>שדות מפתח מומלצים לתסקיר</h2>
+          <ul class="fl">
+            <li class="key">WLL (עומס מקסימלי)</li>
+            <li class="key">מספר זיהוי / סידורי</li>
+            <li class="key">שנת ייצור</li>
+            <li class="key">מצב האביזר (תקין / לא תקין)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 10 · מצלמה ו-OCR ══════════ -->
+<div class="slide" id="s9">
+  <div class="shdr"><div><div class="cap">מצלמה · OCR</div><div class="stitle">צילום תמונות וזיהוי אוטומטי</div></div><div class="snum">10 / 20</div></div>
+  <div class="sbody">
+    <div class="row2">
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>צילום תמונות לאביזר</h2>
+          <ul class="fl">
+            <li>לכל אביזר — מספר בלתי מוגבל של תמונות</li>
+            <li>תמונות מופיעות בנספח בסוף התסקיר</li>
+            <li>כותרת כל תמונה = מספר זיהוי האביזר</li>
+            <li>גריד 2×2 אוטומטי בדף</li>
+          </ul>
+        </div>
+        <div class="card teal" style="margin-bottom:10px">
+          <h2>OCR — זיהוי לוחית נתונים</h2>
+          <p style="margin-bottom:7px">תכונת ML Kit: צלם לוחית ← מילוי אוטומטי:</p>
+          <ul class="fl">
+            <li class="key">יצרן ודגם</li>
+            <li class="key">מספר סידורי</li>
+            <li class="key">WLL מקסימלי</li>
+            <li class="key">שנת ייצור</li>
+          </ul>
+        </div>
+        <div class="hl info">ⓘ דיוק OCR גבוה בתאורה טובה. מומלץ לוודא את הנתונים שזוהו לפני שמירה.</div>
+      </div>
+      <div class="pw">
+        <div class="ph"><div class="ph-notch"></div>
+          <div class="ph-sc">
+            <div class="psh">אביזר 11222 — תמונות</div>
+            <div class="psb">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+                <div style="background:#e0e0e0;height:65px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px">🖼</div>
+                <div style="background:#e0e0e0;height:65px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px">🖼</div>
+              </div>
+              <div style="margin-top:7px">
+                <div class="psbn" style="font-size:9.5px">+ צלם תמונה</div>
+                <div class="psbn" style="background:var(--teal);font-size:9.5px">🔍 OCR — קרא לוחית</div>
+              </div>
+              <div class="pssec">שדות שזוהו</div>
+              <div class="psf">יצרן: Pfeifer</div>
+              <div class="psf">WLL: 5.1 t</div>
+              <div class="psf">מס׳ סידורי: PF-11222</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 11 · הנפקת תסקיר ══════════ -->
+<div class="slide" id="s10">
+  <div class="shdr"><div><div class="cap">הנפקת PDF</div><div class="stitle">שמירה, הנפקת PDF וגרסאות</div></div><div class="snum">11 / 20</div></div>
+  <div class="sbody">
+    <div class="card" style="margin-bottom:10px;padding:14px">
+      <h2 style="margin-bottom:12px">תהליך הנפקת PDF</h2>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div class="step-l">לחץ "שמור<br>והנפק PDF"</div></div>
+        <div class="sarr">←</div>
+        <div class="step"><div class="step-n">2</div><div class="step-l">בניית<br>HTML</div></div>
+        <div class="sarr">←</div>
+        <div class="step"><div class="step-n">3</div><div class="step-l">רינדור<br>WebView</div></div>
+        <div class="sarr">←</div>
+        <div class="step"><div class="step-n">4</div><div class="step-l">מנהל<br>הדפסה</div></div>
+        <div class="sarr">←</div>
+        <div class="step"><div class="step-n">5</div><div class="step-l">PDF<br>נשמר</div></div>
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>גרסאות תסקיר</h2>
+          <p style="margin-bottom:7px">כל שמירה יוצרת גרסה עם מספר משנה:</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+            <span class="badge key">R6006</span><span class="badge opt">R6006.1</span><span class="badge opt">R6006.2</span>
+          </div>
+          <ul class="fl">
+            <li>גרסה מקורית נשמרת תמיד</li>
+            <li>כל גרסה = snapshot HTML מלא</li>
+            <li>ניתן להדפיס/לשתף גרסה ישנה בכל עת</li>
+          </ul>
+        </div>
+        <div class="hl warn">⚠ לאחר הנפקת PDF ראשונה, לא ניתן להוסיף אביזרים לתסקיר. לשינויים — "חידוש תסקיר" → גרסה חדשה.</div>
+      </div>
+      <div class="pw">
+        <div class="ph"><div class="ph-notch"></div>
+          <div class="ph-sc">
+            <div class="psh">תסקיר R6168.4</div>
+            <div class="psb">
+              <div class="pssec">גרסאות שמורות</div>
+              <div class="psrow"><span>R6168</span><span style="color:var(--g2);font-size:8.5px">17/07/2026</span></div>
+              <div class="psrow"><span>R6168.1</span><span style="color:var(--ink3);font-size:8.5px">19/07/2026</span></div>
+              <div class="psrow"><span>R6168.4</span><span style="color:var(--ink3);font-size:8.5px">01/08/2026</span></div>
+              <div style="height:8px"></div>
+              <div class="psbn" style="background:var(--amber);font-size:9.5px">📄 הנפק PDF / הדפס</div>
+              <div class="psbn out" style="font-size:9.5px">שתף (WhatsApp · Email)</div>
+              <div class="psbn out" style="font-size:9.5px">ייצוא HTML למחשב</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 12 · תסקירים שמורים ══════════ -->
+<div class="slide" id="s11">
+  <div class="shdr"><div><div class="cap">תסקירים שמורים</div><div class="stitle">ניהול תסקירים שמורים</div></div><div class="snum">12 / 20</div></div>
+  <div class="sbody">
+    <div class="row2">
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>תצוגת הרשימה</h2>
+          <p style="margin-bottom:7px">כל תסקיר מוצג כקלף עם:</p>
+          <ul class="fl">
+            <li>מספר תסקיר ותאריך</li>
+            <li>שם לקוח / מפעל</li>
+            <li>מספר אביזרים</li>
+            <li>אינדיקטור גרסאות</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>פעולות על תסקיר</h2>
+          <ul class="fl">
+            <li>פתיחה וצפייה מלאה</li>
+            <li>הדפסה / הנפקת PDF חדש</li>
+            <li>שיתוף (WhatsApp, Email)</li>
+            <li>חידוש — גרסה חדשה</li>
+            <li>ייצוא HTML למחשב</li>
+            <li>מחיקה (עם אישור)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>חיפוש</h2>
+          <ul class="fl"><li>מספר תסקיר</li><li>שם לקוח</li><li>תאריך</li></ul>
+        </div>
+      </div>
+      <div class="pw">
+        <div class="ph"><div class="ph-notch"></div>
+          <div class="ph-sc">
+            <div class="psh">תסקירים שמורים</div>
+            <div class="psb">
+              <div class="psf" style="font-size:9px">🔍 חיפוש לפי מספר, לקוח...</div>
+              <div style="border:1px solid var(--border);border-radius:5px;padding:6px;margin-bottom:6px">
+                <div style="font-size:11px;font-weight:700;color:var(--g1)">R6168.4</div>
+                <div style="font-size:8.5px;color:var(--ink2)">לקוח: #### ######</div>
+                <div style="font-size:8.5px;color:var(--ink3)">17/07/2026 · 3 אביזרים</div>
+                <div style="display:flex;gap:3px;margin-top:4px">
+                  <div style="background:var(--g2);color:#fff;border-radius:3px;padding:2px 5px;font-size:8.5px">פתח</div>
+                  <div style="background:var(--amber);color:#fff;border-radius:3px;padding:2px 5px;font-size:8.5px">PDF</div>
+                  <div style="border:1px solid var(--border);border-radius:3px;padding:2px 5px;font-size:8.5px">שתף</div>
+                </div>
+              </div>
+              <div style="border:1px solid var(--border);border-radius:5px;padding:6px">
+                <div style="font-size:11px;font-weight:700;color:var(--g1)">R6165.3</div>
+                <div style="font-size:8.5px;color:var(--ink2)">לקוח: #### ######</div>
+                <div style="font-size:8.5px;color:var(--ink3)">15/06/2026 · 5 אביזרים</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 13 · חידוש תסקירים ══════════ -->
+<div class="slide" id="s12">
+  <div class="shdr"><div><div class="cap">חידוש תסקירים</div><div class="stitle">חידוש — עדכון בדיקה שנתית</div></div><div class="snum">13 / 20</div></div>
+  <div class="sbody">
+    <div class="row2">
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>מה זה חידוש?</h2>
+          <p>כאשר ציוד עובר בדיקה חוזרת, נוצר "חידוש" — גרסה חדשה עם תאריך חדש. ההיסטוריה המלאה נשמרת.</p>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>חידוש לפי מספר תסקיר</h2>
+          <ol style="padding-right:16px;font-size:13px;line-height:2;color:var(--ink2)">
+            <li>הזן מספר תסקיר קיים</li>
+            <li>המערכת טוענת את כל הנתונים</li>
+            <li>עדכן תאריך ופרטים שהשתנו</li>
+            <li>הנפק PDF חדש</li>
+          </ol>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>חידוש לפי לקוח / מפעל</h2>
+          <p>חיפוש לפי שם לקוח ← בחירת התסקיר הרלוונטי ← חידוש.</p>
+        </div>
+        <div class="hl">💡 חידוש שומר היסטוריה מלאה: R6006, R6006.1, R6006.2…</div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>חידוש קיים בכל שלושת הענפים</h2>
+          <div class="row3" style="margin-top:8px">
+            <div class="card green" style="text-align:center;padding:8px"><div style="font-size:11px;font-weight:700;color:var(--g1)">אביזרי הרמה</div></div>
+            <div class="card teal" style="text-align:center;padding:8px"><div style="font-size:11px;font-weight:700;color:var(--teal)">מכונות הרמה</div></div>
+            <div class="card blue" style="text-align:center;padding:8px"><div style="font-size:11px;font-weight:700;color:var(--blue)">קולטי אוויר</div></div>
+          </div>
+        </div>
+        <div class="pw">
+          <div class="ph"><div class="ph-notch"></div>
+            <div class="ph-sc">
+              <div class="psh">חידוש תסקירי אביזרים</div>
+              <div class="psb">
+                <div style="border:1px solid var(--g2);border-radius:5px;padding:8px;margin-bottom:7px">
+                  <div class="pssec">חידוש לפי מספר תסקיר</div>
+                  <div class="psf">מספר תסקיר: R6168</div>
+                  <div class="psbn" style="font-size:9.5px">חפש וטען</div>
+                </div>
+                <div style="border:1px solid var(--border);border-radius:5px;padding:8px">
+                  <div class="pssec">חידוש לפי לקוח</div>
+                  <div class="psf">שם לקוח: #### ###</div>
+                  <div class="psbn out" style="font-size:9.5px">חפש</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 14 · רשימות ══════════ -->
+<div class="slide" id="s13">
+  <div class="shdr"><div><div class="cap">רשימות</div><div class="stitle">רשימות מותאמות אישית — אוטוקומפליט</div></div><div class="snum">14 / 20</div></div>
+  <div class="sbody">
+    <div class="row2">
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>רשימות לקוחות</h2>
+          <p style="margin-bottom:7px">המערכת שומרת לקוחות אוטומטית עם כל הזנה. בהזנות עתידיות — השלמה אוטומטית.</p>
+          <ul class="fl"><li>הוספה / עריכה / מחיקה</li><li>ייבוא מ-Excel / רשימה</li><li>שיתוף רשימה</li></ul>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>רשימות יצרן / דגם</h2>
+          <p style="margin-bottom:7px">זכירת זוגות יצרן-דגם שהוזנו. חיפוש לפי שם יצרן.</p>
+          <ul class="fl"><li>תוצאות ממוינות לפי שכיחות שימוש</li><li>ניקוי ערכים לא רלוונטיים</li></ul>
+        </div>
+        <div class="card">
+          <h2>רשימות ערכים לתבנית</h2>
+          <p>לשדות מסוג "רשימת בחירה" (Dropdown) — ניתן להגדיר ערכים קבועים בתבנית.</p>
+        </div>
+      </div>
+      <div class="pw">
+        <div class="ph"><div class="ph-notch"></div>
+          <div class="ph-sc">
+            <div class="psh">רשימות מותאמות</div>
+            <div class="psb">
+              <div class="pssec">לקוחות שמורים</div>
+              <div class="psrow"><span>#### ######</span><span style="color:var(--g2);font-size:8.5px">עריכה</span></div>
+              <div class="psrow"><span>#### ######</span><span style="color:var(--g2);font-size:8.5px">עריכה</span></div>
+              <div class="psrow"><span>### #######</span><span style="color:var(--g2);font-size:8.5px">עריכה</span></div>
+              <div class="psbn" style="font-size:9.5px;margin-top:5px">+ הוסף לקוח</div>
+              <div class="pssec">יצרנים / דגמים</div>
+              <div class="psrow"><span>Pfeifer / 3-leg</span><span style="color:var(--g2);font-size:8.5px">עריכה</span></div>
+              <div class="psrow"><span>CM / CM-85</span><span style="color:var(--g2);font-size:8.5px">עריכה</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 15 · הגדרות ══════════ -->
+<div class="slide" id="s14">
+  <div class="shdr"><div><div class="cap">הגדרות</div><div class="stitle">הגדרות כלליות — בודק, עיצוב ותבניות</div></div><div class="snum">15 / 20</div></div>
+  <div class="sbody">
+    <div class="row3">
+      <div class="card">
+        <h2>פרטי הבודק</h2>
+        <ul class="fl">
+          <li class="req">שם מלא</li><li class="req">מספר רישיון</li>
+          <li>כתובת / חברה</li><li>טלפון</li>
+          <li>לוגו חברה (תמונה)</li>
+          <li>חותמת דיגיטלית</li>
+          <li>חתימה דיגיטלית</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>ערכת צבעים</h2>
+        <p style="margin-bottom:8px">4 קטגוריות · 20 גוון לכל קטגוריה:</p>
+        <ul class="fl">
+          <li>רקע האפליקציה</li><li>מסגרות וגבולות</li>
+          <li>כותרות</li><li>כפתורים</li>
+        </ul>
+        <div style="display:flex;gap:4px;margin-top:9px;flex-wrap:wrap">
+          <div style="background:#1B5E20;width:22px;height:22px;border-radius:4px"></div>
+          <div style="background:#00695C;width:22px;height:22px;border-radius:4px"></div>
+          <div style="background:#1565C0;width:22px;height:22px;border-radius:4px"></div>
+          <div style="background:#4A148C;width:22px;height:22px;border-radius:4px"></div>
+          <div style="background:#B71C1C;width:22px;height:22px;border-radius:4px"></div>
+          <div style="background:#E65100;width:22px;height:22px;border-radius:4px"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>מספור תסקירים</h2>
+        <ul class="fl"><li>הגדרת המספר הבא</li><li>מספור אוטומטי עולה</li><li>תיקון ידני אם נדרש</li></ul>
+        <div style="height:10px"></div>
+        <h2>תבניות טקסט</h2>
+        <p style="margin-top:5px;font-size:12px">עריכת נוסח הצהרת הבודק, הנחיות שימוש והערות סטנדרטיות שמופיעות בכל תסקיר.</p>
+      </div>
+    </div>
+    <div class="hl warn">⚠ שינוי פרטי בודק / לוגו / חותמת ישפיע רק על תסקירים חדשים — תסקירים שהונפקו לא ישתנו.</div>
+  </div>
+</div>
+
+<!-- ══════════ 16 · מכונות הרמה ══════════ -->
+<div class="slide" id="s15">
+  <div class="shdr" style="background:var(--teal)"><div><div class="cap">מכונות הרמה</div><div class="stitle">ענף מכונות הרמה</div></div><div class="snum">16 / 20</div></div>
+  <div class="sbody">
+    <div class="row2">
+      <div>
+        <div class="card teal" style="margin-bottom:10px">
+          <h2>מה שונה ממכונות?</h2>
+          <ul class="fl">
+            <li class="key">תבנית הטופס כוללת פרטי רישוי רכב</li>
+            <li class="key">שדה "מספר רישוי" — שדה מפתח</li>
+            <li class="key">שדה "סוג מכונה" (עגורן, מלגזה…)</li>
+            <li class="key">מבנה HTML ייעודי למכונות</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>פעולות ייחודיות למכונות</h2>
+          <ul class="fl">
+            <li>בחירת סוג מכונה מרשימה</li>
+            <li>שכפול תבנית קיימת</li>
+            <li>עריכת מבנה הטופס</li>
+            <li>ייצוא HTML ומטא-דאטה למחשב</li>
+            <li>ייצוא / ייבוא תבניות JSON</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>חידוש תסקירי מכונות</h2>
+          <p>זהה לאביזרים — חידוש לפי מספר תסקיר או לפי לקוח.</p>
+        </div>
+      </div>
+      <div class="pw">
+        <div class="ph"><div class="ph-notch"></div>
+          <div class="ph-sc">
+            <div class="psh" style="background:var(--teal)">מכונות הרמה</div>
+            <div class="psb">
+              <div class="psbn" style="background:var(--teal)">▼ בחר סוג מכונה</div>
+              <div class="psbn" style="background:var(--teal)">רשומות שמורות — מכונות</div>
+              <div class="psbn" style="background:var(--teal)">חזרה לתפריט מכונות</div>
+              <div style="height:6px"></div>
+              <div class="psbn out" style="border-color:var(--teal);color:var(--teal);font-size:9.5px">שכפל תבנית קיימת</div>
+              <div class="psbn out" style="border-color:var(--teal);color:var(--teal);font-size:9.5px">ערוך מבנה טופס מכונה</div>
+              <div class="psbn out" style="border-color:var(--teal);color:var(--teal);font-size:9.5px">ייצוא HTML תסקירים</div>
+              <div class="psbn out" style="border-color:var(--teal);color:var(--teal);font-size:9.5px">ייצוא / ייבוא תבניות JSON</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 17 · קולטי אוויר ══════════ -->
+<div class="slide" id="s16">
+  <div class="shdr" style="background:var(--blue)"><div><div class="cap">קולטי אוויר</div><div class="stitle">ענף קולטי אוויר וקומפרסורים</div></div><div class="snum">17 / 20</div></div>
+  <div class="sbody">
+    <div class="row2">
+      <div>
+        <div class="card blue" style="margin-bottom:10px">
+          <h2>שדות ייחודיים לקולטי אוויר</h2>
+          <ul class="fl">
+            <li class="key">סוג קולט / קומפרסור</li>
+            <li class="key">נפח (ליטרים)</li>
+            <li class="key">לחץ עיצוב (בר)</li>
+            <li class="key">מספר סידורי</li>
+            <li class="key">יצרן ודגם</li>
+            <li>תיאור נוסף</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>פעולות ייחודיות</h2>
+          <ul class="fl">
+            <li>ייצוא מטא-דאטה JSON</li>
+            <li>חידוש לפי מספר תסקיר</li>
+            <li>חידוש לפי לקוח / מפעל</li>
+            <li>הגדרות ייחודיות (הערות, פריסה)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>מבנה ה-JSON למחשב</h2>
+          <div class="path">{ exportVersion, exportDate,<br>&nbsp;inspectorName,<br>&nbsp;reports: [{<br>&nbsp;&nbsp;baseReportNumber, versionName,<br>&nbsp;&nbsp;date, client,<br>&nbsp;&nbsp;receiverType, serialNumber,<br>&nbsp;&nbsp;volumeLiters, designPressureBar<br>&nbsp;}]}</div>
+        </div>
+      </div>
+      <div class="pw">
+        <div class="ph"><div class="ph-notch"></div>
+          <div class="ph-sc">
+            <div class="psh" style="background:var(--blue)">קולטי אוויר</div>
+            <div class="psb">
+              <div class="psbn" style="background:var(--blue)">תסקיר חדש — קולט אוויר</div>
+              <div class="psbn" style="background:var(--blue)">תסקירים שמורים</div>
+              <div class="psbn" style="background:var(--blue)">חידוש תסקירי קולטי אוויר</div>
+              <div style="height:6px"></div>
+              <div class="psbn out" style="border-color:var(--blue);color:var(--blue);font-size:9px">הגדרות (הערות, פריסה ושדות)</div>
+              <div class="psbn out" style="border-color:var(--blue);color:var(--blue);font-size:9.5px">ייצוא מטא-דאטה למחשב</div>
+              <div class="pssec">שדה לדוגמה</div>
+              <div class="psf">נפח: 500 ליטר</div>
+              <div class="psf">לחץ עיצוב: 10 בר</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 18 · ייצוא למחשב ══════════ -->
+<div class="slide" id="s17">
+  <div class="shdr"><div><div class="cap">ייצוא למחשב</div><div class="stitle">ייצוא תסקירים ותבניות למחשב</div></div><div class="snum">18 / 20</div></div>
+  <div class="sbody">
+    <div class="card" style="margin-bottom:10px;padding:14px">
+      <h2 style="margin-bottom:12px">תהליך ייצוא לתצוגה במחשב</h2>
+      <div class="eflow">
+        <div class="estep"><div class="eico">📱</div><div class="elbl">ייצוא מטא-דאטה</div><div class="esub">קובץ JSON עם רשימת התסקירים</div></div>
+        <div class="earr">←</div>
+        <div class="estep"><div class="eico">📄</div><div class="elbl">ייצוא HTML</div><div class="esub">קבצי HTML של כל תסקיר</div></div>
+        <div class="earr">←</div>
+        <div class="estep"><div class="eico">🔌</div><div class="elbl">העברה USB</div><div class="esub">חבר נייד ← גרור לתיקייה</div></div>
+        <div class="earr">←</div>
+        <div class="estep"><div class="eico">💻</div><div class="elbl">פתח viewer.html</div><div class="esub">גרור את כל הקבצים לחלון</div></div>
+      </div>
+    </div>
+    <div class="row2">
+      <div>
+        <div class="card green" style="margin-bottom:10px">
+          <h2>ייצוא תסקירים</h2>
+          <ul class="fl">
+            <li>JSON מטא-דאטה + HTML נפרד לכל תסקיר</li>
+            <li>שמירה ל: <code>Download/LiftingInspection/</code></li>
+            <li>Machines/ ← מכונות · AirReceivers/ ← קולטי אוויר</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>ייצוא / ייבוא תבניות</h2>
+          <ul class="fl">
+            <li>ייצוא תבנית ← קובץ JSON</li>
+            <li>ייבוא תבנית ← קובץ JSON</li>
+            <li>שיתוף בין בודקים שונים</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>מיקומי קבצים בנייד</h2>
+          <div class="path">Download/<br>└─ LiftingInspection/<br>&nbsp;&nbsp;├─ Machines/<br>&nbsp;&nbsp;│&nbsp;├─ R6006.html<br>&nbsp;&nbsp;│&nbsp;└─ machines_meta.json<br>&nbsp;&nbsp;├─ AirReceivers/<br>&nbsp;&nbsp;│&nbsp;└─ air_meta.json<br>&nbsp;&nbsp;└─ [תסקירי אביזרים]</div>
+        </div>
+        <div class="hl info">ⓘ JSON + HTML חייבים להיות מיוצאים ביחד — הmatcher בviewer מחבר לפי שם הגרסה (<code>versionName</code>).</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 19 · מנהל תסקירים PC ══════════ -->
+<div class="slide" id="s18">
+  <div class="shdr"><div><div class="cap">מנהל תסקירים במחשב</div><div class="stitle">viewer.html — צפייה, חיפוש והדפסה</div></div><div class="snum">19 / 20</div></div>
+  <div class="sbody">
+    <div class="row2">
+      <div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>מה זה viewer.html?</h2>
+          <p>קובץ HTML עצמאי שפועל ישירות בדפדפן PC (Chrome/Edge) — ללא שרת, ללא התקנה. פותחים בלחיצה כפולה.</p>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>יכולות המנהל</h2>
+          <ul class="fl">
+            <li>גרירת קבצי JSON + HTML ישירות לחלון</li>
+            <li>לשוניות: מכונות הרמה · קולטי אוויר</li>
+            <li>חיפוש: מספר, לקוח, סוג, תאריך</li>
+            <li>מיון לפי כל עמודה</li>
+            <li>סיכום: כמות תסקירים + עם HTML</li>
+            <li>צפייה בתסקיר מלא בחלון מוד</li>
+            <li>הדפסה עם שוליים תקינים</li>
+            <li>מצב כהה/בהיר (לפי OS)</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>מיקום הקובץ</h2>
+          <div class="path">pc_viewer/viewer.html</div>
+        </div>
+      </div>
+      <div>
+        <div class="pcm">
+          <div class="pcm-bar">
+            <div class="pcm-dot" style="background:#ff5f57"></div>
+            <div class="pcm-dot" style="background:#ffbd2e"></div>
+            <div class="pcm-dot" style="background:#28c840"></div>
+          </div>
+          <div class="pcm-sc">
+            <div style="background:#1B5E20;color:#fff;padding:5px 8px;border-radius:4px 4px 0 0;font-size:9.5px;font-weight:700">מנהל תסקירים — ציוד הרמה</div>
+            <div style="display:flex;gap:5px;margin-top:5px">
+              <div style="width:75px;background:var(--card);border:1px solid var(--border);border-radius:4px;padding:5px;font-size:8.5px;flex-shrink:0">
+                <div style="font-weight:700;color:var(--g1);margin-bottom:3px">סיכום</div>
+                <div style="color:var(--ink2)">מכונות: 14</div>
+                <div style="color:var(--ink2)">קולטי: 8</div>
+                <div style="color:var(--ink2)">HTML: 22</div>
+                <div style="height:6px"></div>
+                <div style="background:var(--g3);border-radius:3px;padding:3px 5px;font-size:7.5px;color:var(--g1);font-weight:700">מכונות הרמה ▲</div>
+                <div style="background:var(--teal-s);border-radius:3px;padding:3px 5px;font-size:7.5px;color:var(--teal);margin-top:2px">קולטי אוויר</div>
+              </div>
+              <div style="flex:1">
+                <div style="background:var(--card);border:1px solid var(--border);border-radius:4px;font-size:8px;overflow:hidden">
+                  <div style="background:var(--surface);padding:3px 5px;display:grid;grid-template-columns:1fr 1fr 1fr 50px;gap:2px;color:var(--ink3);font-size:7.5px">
+                    <span>מספר</span><span>לקוח</span><span>תאריך</span><span>HTML</span>
+                  </div>
+                  <div style="padding:3px 5px;display:grid;grid-template-columns:1fr 1fr 1fr 50px;gap:2px;border-bottom:1px solid var(--border)">
+                    <span style="color:var(--g1);font-weight:700">R6006</span><span style="color:var(--ink2)">### ##</span><span style="color:var(--ink3)">15/06</span><span style="color:var(--g2);font-size:7px">יש ✓</span>
+                  </div>
+                  <div style="padding:3px 5px;display:grid;grid-template-columns:1fr 1fr 1fr 50px;gap:2px;border-bottom:1px solid var(--border)">
+                    <span style="color:var(--g1);font-weight:700">R6007</span><span style="color:var(--ink2)">### ##</span><span style="color:var(--ink3)">20/06</span><span style="color:var(--g2);font-size:7px">יש ✓</span>
+                  </div>
+                  <div style="padding:3px 5px;display:grid;grid-template-columns:1fr 1fr 1fr 50px;gap:2px">
+                    <span style="color:var(--g1);font-weight:700">R6008</span><span style="color:var(--ink2)">### ##</span><span style="color:var(--ink3)">02/07</span><span style="color:var(--ink3);font-size:7px">אין</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ 20 · גיבוי ══════════ -->
+<div class="slide" id="s19">
+  <div class="shdr"><div><div class="cap">גיבוי ושחזור</div><div class="stitle">גיבוי ושחזור — כל נתוני האפליקציה</div></div><div class="snum">20 / 20</div></div>
+  <div class="sbody">
+    <div class="row2">
+      <div>
+        <div class="card green" style="margin-bottom:10px">
+          <h2>מה כולל הגיבוי?</h2>
+          <ul class="fl">
+            <li>כל התסקירים השמורים + HTML</li>
+            <li>פרטי הבודק + כל ההגדרות</li>
+            <li>כל התבניות</li>
+            <li>רשימות לקוחות ויצרנים</li>
+            <li>תמונות אביזרים</li>
+            <li>ערכת הצבעים</li>
+            <li>תבניות טקסט מותאמות</li>
+          </ul>
+        </div>
+        <div class="card" style="margin-bottom:10px">
+          <h2>ביצוע גיבוי</h2>
+          <ol style="padding-right:16px;font-size:13px;line-height:2.1;color:var(--ink2)">
+            <li>הגדרות כלליות ← גיבוי ושחזור</li>
+            <li>לחץ "צור גיבוי"</li>
+            <li>בחר מיקום שמירה</li>
+            <li>קובץ ZIP נשמר</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h2>שחזור</h2>
+          <p>בחר קובץ גיבוי ← לחץ "שחזר" ← אשר. <strong>שחזור מחליף את כל הנתונים הקיימים.</strong></p>
+        </div>
+      </div>
+      <div>
+        <div class="card amber" style="margin-bottom:10px">
+          <h2>המלצות גיבוי</h2>
+          <ul class="fl">
+            <li class="req">גבה לפני כל שדרוג גרסה</li>
+            <li class="req">גבה בסוף יום עבודה</li>
+            <li>שמור גיבויים ב-Google Drive</li>
+            <li>שמור עותק ב-PC</li>
+          </ul>
+        </div>
+        <div class="card teal" style="margin-bottom:10px">
+          <h2>העברה בין מכשירים</h2>
+          <ol style="padding-right:16px;font-size:13px;line-height:2.1;color:var(--ink2)">
+            <li>צור גיבוי במכשיר הישן</li>
+            <li>התקן האפליקציה במכשיר חדש</li>
+            <li>שחזר מהגיבוי</li>
+          </ol>
+        </div>
+        <div class="hl info">ⓘ <strong>Firebase App Distribution:</strong> עדכוני האפליקציה מגיעים ישירות דרך Firebase ← ללא Google Play. בהפעלה ראשונה האפליקציה מגדירה את עצמה אוטומטית.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /slides -->
+
+<!-- nav -->
+<nav class="nav">
+  <button class="nbtn" id="bp" onclick="go(-1)" disabled>→ הקודם</button>
+  <div class="nind" id="ind">שקופית 1 מתוך 20</div>
+  <button class="nbtn" id="bn" onclick="go(1)">הבא ←</button>
+</nav>
+</div>
+
+<script>
+"use strict";
+const all = document.querySelectorAll('.slide');
+const N = all.length;
+let c = 0;
+function go(d) {
+  all[c].classList.remove('on');
+  c = Math.max(0, Math.min(N-1, c+d));
+  all[c].classList.add('on');
+  upd();
+}
+function jump(n) {
+  all[c].classList.remove('on');
+  c = Math.max(0, Math.min(N-1, n));
+  all[c].classList.add('on');
+  upd();
+}
+function upd() {
+  document.getElementById('ind').textContent = 'שקופית '+(c+1)+' מתוך '+N;
+  document.getElementById('bp').disabled = c===0;
+  document.getElementById('bn').disabled = c===N-1;
+  document.getElementById('pf').style.width = ((c+1)/N*100)+'%';
+}
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowLeft'||e.key==='ArrowDown'||e.key===' '||e.key==='Enter') go(1);
+  if(e.key==='ArrowRight'||e.key==='ArrowUp') go(-1);
+  if(e.key==='Home') jump(0);
+  if(e.key==='End')  jump(N-1);
+});
+upd();
+</script>

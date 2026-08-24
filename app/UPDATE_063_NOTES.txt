@@ -1,0 +1,5 @@
+Update 063
+- Fixed "Other" free-text behavior in smart list fields.
+- When choosing "אחר" in a list field such as דגם, the free text field now stays open while typing.
+- The typed value is preserved and used as the field value instead of closing after the first character.
+- Applied to smart accessory form list fields and machine smart form/general list fields.

@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>עריכת טופס מכונת הרמה</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:#ECEFF1;color:#1a1a1a;direction:rtl;min-height:100vh;}
+
+/* ───── HEADER ───── */
+.app-header{
+  background:#1B5E20;color:white;
+  padding:14px 20px 10px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
+.app-header h1{font-size:20px;font-weight:bold;text-align:center;margin-bottom:10px;}
+.header-row{display:flex;align-items:center;gap:10px;}
+.header-row label{font-size:12px;opacity:0.85;white-space:nowrap;}
+.header-row input{
+  flex:1;padding:7px 10px;border:none;border-radius:6px;
+  font-size:15px;font-family:Arial;direction:rtl;
+  background:rgba(255,255,255,0.15);color:white;
+}
+.header-row input::placeholder{color:rgba(255,255,255,0.55);}
+.header-row input:focus{outline:none;background:rgba(255,255,255,0.25);}
+
+/* ───── TABS ───── */
+.tab-bar{
+  display:flex;gap:6px;overflow-x:auto;
+  padding:10px 14px 0;background:#1B5E20;
+  scrollbar-width:none;
+}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab-btn{
+  padding:8px 16px;border:none;border-radius:8px 8px 0 0;
+  font-size:13px;font-family:Arial;cursor:pointer;
+  background:rgba(255,255,255,0.18);color:rgba(255,255,255,0.8);
+  white-space:nowrap;transition:all 0.2s;position:relative;flex-shrink:0;
+}
+.tab-btn:hover{background:rgba(255,255,255,0.28);}
+.tab-btn.active{
+  background:#ECEFF1;color:#1B5E20;font-weight:bold;
+}
+.tab-badge{
+  background:#A34840;color:white;
+  border-radius:10px;padding:1px 6px;font-size:10px;
+  margin-right:4px;
+}
+
+/* ───── CONTENT ───── */
+.content{padding:18px 16px 100px;max-width:780px;margin:0 auto;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ───── CARDS ───── */
+.card{
+  background:white;border-radius:10px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.10);
+  margin-bottom:14px;overflow:hidden;
+}
+.card-header{
+  background:#2E7D32;color:white;
+  padding:10px 14px;font-size:14px;font-weight:bold;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-body{padding:14px;}
+.hint{font-size:12px;color:#777;margin-bottom:10px;line-height:1.6;}
+
+/* ───── FORM ELEMENTS ───── */
+.lbl{display:block;font-size:12px;font-weight:bold;color:#555;margin-bottom:3px;margin-top:8px;}
+.lbl:first-child{margin-top:0;}
+input[type=text],textarea,select{
+  width:100%;padding:8px 10px;border:1.5px solid #ccc;border-radius:6px;
+  font-size:13px;font-family:Arial;direction:rtl;background:white;
+}
+input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:#2E7D32;}
+textarea{resize:vertical;line-height:1.5;}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+
+/* ───── CHECKBOX ROW ───── */
+.chk-row{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;cursor:pointer;}
+.chk-row input{width:16px;height:16px;cursor:pointer;accent-color:#2E7D32;}
+
+/* ───── GENERAL FIELD CARD ───── */
+.gen-card{
+  border:1.5px solid #e0e0e0;border-radius:8px;
+  padding:12px;margin-bottom:10px;background:#FAFAFA;
+}
+.gen-tag{
+  display:inline-block;font-size:11px;color:#777;
+  background:#f0f0f0;border-radius:4px;padding:2px 7px;margin-bottom:6px;
+}
+
+/* ───── FIELD CARD ───── */
+.field-card{
+  border:1.5px solid #e0e0e0;border-radius:8px;
+  padding:14px;margin-bottom:12px;background:#FAFAFA;
+  position:relative;
+}
+.field-num{
+  font-weight:bold;font-size:12px;color:#2E7D32;margin-bottom:8px;
+}
+.field-actions{
+  display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;
+}
+
+/* ───── DETAILS GRID ───── */
+.details-card{
+  border:1.5px solid #e0e0e0;border-radius:8px;
+  padding:12px;margin-bottom:10px;background:#FAFAFA;
+}
+.details-card-header{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:13px;font-weight:bold;color:#555;margin-bottom:8px;
+}
+
+/* ───── VARS BAR ───── */
+.vars-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.var-chip{
+  background:#2E7D32;color:white;border:none;border-radius:14px;
+  padding:4px 12px;font-size:12px;cursor:pointer;font-family:Arial;
+  transition:background 0.15s;
+}
+.var-chip:hover{background:#388E3C;}
+.var-chip.sys{background:#546E7A;}
+.var-chip.sys:hover{background:#607D8B;}
+
+/* ───── BUTTONS ───── */
+.btn{
+  padding:9px 18px;border-radius:7px;border:none;
+  font-size:13px;font-family:Arial;cursor:pointer;
+  font-weight:bold;transition:opacity 0.15s;
+}
+.btn:hover{opacity:0.85;}
+.btn-green {background:#2E7D32;color:white;}
+.btn-red   {background:#A34840;color:white;}
+.btn-outline{background:white;color:#2E7D32;border:2px solid #2E7D32;}
+.btn-gray  {background:#eee;color:#555;border:1px solid #ddd;}
+.btn-danger{background:white;color:#c62828;border:1px solid #ef9a9a;}
+.btn-sm    {padding:5px 12px;font-size:12px;}
+.btn-full  {width:100%;margin-top:8px;}
+.btn-icon  {padding:5px 10px;font-size:16px;line-height:1;}
+
+/* ───── BOTTOM BAR ───── */
+.bottom-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:white;border-top:1px solid #ddd;
+  padding:10px 16px;display:flex;gap:10px;
+  box-shadow:0 -2px 8px rgba(0,0,0,0.1);z-index:50;
+}
+.bottom-bar .btn{flex:1;}
+
+/* ───── EXPORT CARD ───── */
+.export-big{
+  text-align:center;padding:30px 20px;
+}
+.export-big .icon{font-size:48px;margin-bottom:12px;}
+.export-big h2{font-size:18px;margin-bottom:8px;color:#2E7D32;}
+.export-big p{font-size:13px;color:#777;margin-bottom:20px;line-height:1.7;}
+
+/* ───── EMPTY STATE ───── */
+.empty-state{
+  text-align:center;padding:30px;color:#aaa;font-size:14px;
+}
+
+/* ───── TOAST ───── */
+.toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  background:#1B5E20;color:white;padding:11px 24px;border-radius:22px;
+  font-size:14px;opacity:0;transition:opacity 0.3s;pointer-events:none;
+  white-space:nowrap;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,0.2);
+}
+.toast.show{opacity:1;}
+.toast.err{background:#c62828;}
+
+.error-msg{color:#c62828;font-size:13px;font-weight:bold;margin-top:6px;}
+#importFileInput{display:none;}
+
+/* ───── הכול - all sections inline ───── */
+.section-title{
+  font-size:15px;font-weight:bold;color:#1B5E20;
+  border-bottom:2px solid #1B5E20;padding-bottom:6px;margin:20px 0 12px;
+}
+.section-title:first-child{margin-top:0;}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>עריכת טופס מכונת הרמה</h1>
+  <div class="header-row">
+    <label>שם סוג:</label>
+    <input type="text" id="typeName"
+      placeholder="לדוגמה: פיגום תלוי / דופן הידראולית...">
+  </div>
+</div>
+
+<!-- Bundle selector panel — מופיע כשנטענו מספר תבניות מ-bundle -->
+<div id="bundle-panel" style="display:none;background:#0D47A1;padding:8px 14px;">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span style="color:white;font-size:12px;white-space:nowrap;font-weight:bold;">תבנית:</span>
+    <select id="bundle-select" onchange="switchBundleTemplate(parseInt(this.value))"
+      style="flex:1;padding:5px 8px;border:none;border-radius:6px;font-size:13px;font-family:Arial;direction:rtl;min-width:0;"></select>
+    <span id="bundle-count" style="color:rgba(255,255,255,0.7);font-size:11px;white-space:nowrap;"></span>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('all',this)">הכול</button>
+  <button class="tab-btn" onclick="switchTab('general',this)">פרטים כלליים</button>
+  <button class="tab-btn" onclick="switchTab('fields',this)">שדות <span class="tab-badge" id="fieldsBadge">0</span></button>
+  <button class="tab-btn" onclick="switchTab('details',this)">פרטי מכונה</button>
+  <button class="tab-btn" onclick="switchTab('desc',this)">תיאור</button>
+  <button class="tab-btn" onclick="switchTab('export',this)">ייצוא / ייבוא</button>
+</div>
+
+<div class="content">
+
+  <!-- ══════════ הכול ══════════ -->
+  <div class="tab-panel active" id="tab-all">
+
+    <div class="section-title">פרטים כלליים</div>
+    <div id="all-general-container"></div>
+
+    <div class="section-title">שדות משתנים</div>
+    <div id="all-fields-container"></div>
+    <button class="btn btn-red btn-full" onclick="addField();switchTab('fields',document.querySelectorAll('.tab-btn')[2])">+ הוסף שדה</button>
+
+    <div class="section-title">פרטי מכונה בתסקיר</div>
+    <div id="all-details-container"></div>
+
+    <div class="section-title">תבנית תיאור</div>
+    <div id="all-desc-container"></div>
+
+  </div>
+
+  <!-- ══════════ פרטים כלליים ══════════ -->
+  <div class="tab-panel" id="tab-general">
+    <div class="card">
+      <div class="card-header">שדות מערכת — פרטי תסקיר</div>
+      <div class="card-body">
+        <p class="hint">שדות אלה מופיעים בראש התסקיר. ניתן לערוך כותרת, סוג קלט וחובה/אופציונלי.</p>
+        <div id="generalFieldsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ שדות ══════════ -->
+  <div class="tab-panel" id="tab-fields">
+    <div class="card">
+      <div class="card-header">
+        <span>שדות משתנים</span>
+        <button class="btn btn-outline btn-sm" onclick="addField()">+ הוסף שדה</button>
+      </div>
+      <div class="card-body">
+        <p class="hint">כל שדה = עמודה / פרט בתסקיר. ניתן להגדיר שם, סוג קלט, ערך ברירת מחדל, תפקיד ועוד.</p>
+        <div id="fieldsList"></div>
+        <div id="fieldsEmpty" class="empty-state">לחץ "הוסף שדה" להוספת שדה ראשון</div>
+        <button class="btn btn-red btn-full" onclick="addField()">+ הוסף שדה</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ פרטי מכונה ══════════ -->
+  <div class="tab-panel" id="tab-details">
+    <div class="card">
+      <div class="card-header">
+        <span>סידור פרטי מכונה בתסקיר</span>
+        <button class="btn btn-outline btn-sm" onclick="addDetailsRow()">+ שורה</button>
+      </div>
+      <div class="card-body">
+        <p class="hint">בכל שורה יוצגו עד 3 כותרות + ערכים. עד 4 שורות.</p>
+        <div id="detailsRowsList"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn btn-outline btn-sm" style="flex:1" onclick="addDetailsRow()">+ הוסף שורה</button>
+          <button class="btn btn-gray btn-sm" style="flex:1" onclick="resetDetailsRows()">↺ איפוס</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ תיאור ══════════ -->
+  <div class="tab-panel" id="tab-desc">
+    <div class="card">
+      <div class="card-header">תבנית תיאור המכונה</div>
+      <div class="card-body">
+        <p class="hint">כתוב תיאור עם משתנים בסוגריים מסולסלים. לחץ על כפתור שדה להוסיפו. <code>{d}</code> = סוג הינע.</p>
+        <div class="vars-bar" id="descVarsBar"></div>
+        <textarea id="descriptionTemplate" rows="7"
+          placeholder="לדוגמה: פיגום תלוי, {מספר נקודות} נקודות תילוי, יצרן {יצרן}."></textarea>
+        <div id="errorMsg" class="error-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ ייצוא / ייבוא ══════════ -->
+  <div class="tab-panel" id="tab-export">
+    <div class="card">
+      <div class="card-body export-big">
+        <div class="icon">⬇</div>
+        <h2>ייצוא תבנית לנייד</h2>
+        <p>שומר קובץ <strong>JSON</strong> למחשב.<br>
+          העתק לנייד עם כבל USB ←<br>
+          פתח אפליקציה ← מכונות הרמה ←<br>
+          <strong>"ייבוא תבנית מקובץ JSON"</strong></p>
+        <button class="btn btn-green" style="font-size:16px;padding:12px 32px" onclick="exportJson()">ייצוא JSON ←</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body export-big">
+        <div class="icon">⬆</div>
+        <h2>ייבוא תבנית לעריכה</h2>
+        <p>מקבל שני סוגי קבצים:<br>
+          <strong>• machine_template_XXX.json</strong> — תבנית שיצאת מהעורך<br>
+          <strong>• machine_reports_export_XXX.json</strong> — ייצוא תסקירים מהנייד (חולץ ממנו את התבנית)</p>
+        <button class="btn btn-outline" style="font-size:15px;padding:11px 28px"
+          onclick="document.getElementById('importFileInput').click()">בחר קובץ JSON</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body export-big">
+        <div class="icon">↺</div>
+        <h2>נקה הכל</h2>
+        <p>מחק את כל הנתונים והתחל תבנית חדשה.</p>
+        <button class="btn btn-gray" style="font-size:14px;padding:10px 24px" onclick="resetAll()">נקה הכל</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- Bottom bar -->
+<div class="bottom-bar">
+  <button class="btn btn-outline" onclick="document.getElementById('importFileInput').click()">⬆ ייבוא</button>
+  <button class="btn btn-green" onclick="exportJson()">⬇ ייצוא JSON</button>
+</div>
+
+<input type="file" id="importFileInput" accept=".json" onchange="importJson(event)">
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   קבועים
+══════════════════════════════════════════ */
+const INPUT_TYPES=[
+  {id:'TEXT',         label:'טקסט חופשי'},
+  {id:'MULTILINE_TEXT',label:'טקסט רב שורות'},
+  {id:'INTEGER',      label:'מספר שלם'},
+  {id:'DECIMAL',      label:'מספר עשרוני'},
+  {id:'DATE',         label:'תאריך'},
+  {id:'BOOLEAN',      label:'כן / לא'},
+  {id:'LIST',         label:'רשימה נפתחת'},
+  {id:'TEXT_TEMPLATE',label:'טקסט עם משתנים'},
+  {id:'FORMULA',      label:'חישוב מתמטי'},
+  {id:'READ_ONLY',    label:'תוצאה / לקריאה בלבד'},
+  {id:'LOAD_TABLE',   label:'טבלת עומסים (שורות דינמיות)'}
+];
+const ROLES=[
+  {id:'NONE',              label:'ללא תפקיד מיוחד'},
+  {id:'CLIENT',            label:'לקוח'},
+  {id:'PHONE',             label:'טלפון / איש קשר'},
+  {id:'ADDRESS',           label:'כתובת'},
+  {id:'LICENSE',           label:'מס׳ רישוי'},
+  {id:'INSPECTION_ADDRESS',label:'כתובת בדיקה'},
+  {id:'CHECKED_AT',        label:'הציוד נבדק ב'},
+  {id:'MANUFACTURER',      label:'יצרן'},
+  {id:'MODEL',             label:'דגם'},
+  {id:'SERIAL',            label:'מס׳ סידורי'},
+  {id:'TEST_LOAD',         label:'עומס מבחן'},
+  {id:'RADIUS',            label:'רדיוס'},
+  {id:'WLL',               label:'עומס עבודה בטוח / ע.ע.ב'}
+];
+const DETAILS_OPTS=[
+  {key:'empty',         label:'ריק'},
+  {key:'manufacturer',  label:'יצרן'},
+  {key:'model',         label:'דגם'},
+  {key:'productionYear',label:'שנת ייצור'},
+  {key:'serial',        label:'מס׳ סידורי'},
+  {key:'internalNumber',label:'מספר פנימי'},
+  {key:'license',       label:'מס׳ רישוי'},
+  {key:'driveType',     label:'סוג הינע'},
+  {key:'testLoad',      label:'עומס מבחן'},
+  {key:'radius',        label:'רדיוס'},
+  {key:'wll',           label:'עומס עבודה בטוח'}
+];
+const DEFAULT_GEN=[
+  {id:'client',           label:'לקוח',            inputType:'TEXT', isRequired:true,  options:[]},
+  {id:'phone',            label:'טלפון / איש קשר', inputType:'TEXT', isRequired:false, options:[]},
+  {id:'address',          label:'כתובת',            inputType:'TEXT', isRequired:false, options:[]},
+  {id:'license',          label:'מס׳ רישוי',        inputType:'TEXT', isRequired:false, options:[]},
+  {id:'inspectionAddress',label:'כתובת בדיקה',      inputType:'TEXT', isRequired:true,  options:[]},
+  {id:'checkedAt',        label:'הציוד נבדק ב',     inputType:'LIST', isRequired:true,
+   options:['אתר בנייה','מחסן לוגיסטי','מפעל','מוסך','חצר הלקוח','אחר']}
+];
+const DEFAULT_ROWS=[
+  {cells:['manufacturer','model','productionYear']},
+  {cells:['serial','internalNumber','empty']}
+];
+
+/* ══════════════════════════════════════════
+   State
+══════════════════════════════════════════ */
+let generalFields=JSON.parse(JSON.stringify(DEFAULT_GEN));
+let fields=[{name:'תיאור כללי',inputType:'TEXT',options:[],defaultValue:'',isRequired:true,role:'NONE',isLocked:false,isMemoryKey:false}];
+let templateBundle=[];
+let bundleCurrentIdx=-1;
+let detailsRows=JSON.parse(JSON.stringify(DEFAULT_ROWS));
+let activeTab='all';
+
+/* ══════════════════════════════════════════
+   Tabs
+══════════════════════════════════════════ */
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  activeTab=id;
+  if(id==='all') renderAll();
+  if(id==='general') renderGeneralFields();
+  if(id==='fields') renderFields();
+  if(id==='details') renderDetailsRows();
+  if(id==='desc') updateDescVarsBar();
+}
+
+/* ══════════════════════════════════════════
+   Render ALL
+══════════════════════════════════════════ */
+function renderAll(){
+  renderGeneralInto('all-general-container');
+  renderFieldsInto('all-fields-container');
+  renderDetailsInto('all-details-container');
+  renderDescInto('all-desc-container');
+}
+function init(){renderAll();}
+
+/* ══════════════════════════════════════════
+   שדות מערכת
+══════════════════════════════════════════ */
+function renderGeneralFields(){renderGeneralInto('generalFieldsList');}
+
+function renderGeneralInto(containerId){
+  const c=document.getElementById(containerId);
+  if(!c)return;
+  c.innerHTML='';
+  generalFields.forEach((f,i)=>{
+    const optTypes=INPUT_TYPES.filter(t=>t.id!='TEXT_TEMPLATE'&&t.id!='FORMULA')
+      .map(t=>`<option value="${t.id}" ${t.id===f.inputType?'selected':''}>${t.label}</option>`).join('');
+    const showOpts=f.inputType==='LIST';
+    const optsText=(f.options||[]).join('\n');
+    const div=document.createElement('div');
+    div.className='gen-card';
+    div.innerHTML=`
+      <span class="gen-tag">מזהה: ${f.id}</span>
+      <div class="row2">
+        <div><label class="lbl">כותרת שדה</label>
+          <input type="text" value="${esc(f.label)}" oninput="genFieldChange(${i},'label',this.value)"></div>
+        <div><label class="lbl">סוג קלט</label>
+          <select onchange="genFieldChange(${i},'inputType',this.value)">${optTypes}</select></div>
+      </div>
+      <div id="${containerId}_genOpts_${i}" style="display:${showOpts?'block':'none'}">
+        <label class="lbl">אפשרויות רשימה (כל אפשרות בשורה)</label>
+        <textarea rows="3" oninput="genFieldChange(${i},'optionsText',this.value)">${esc(optsText)}</textarea>
+      </div>
+      <label class="chk-row">
+        <input type="checkbox" ${f.isRequired?'checked':''} onchange="genFieldChange(${i},'isRequired',this.checked)">
+        שדה חובה להפקת תסקיר
+      </label>`;
+    c.appendChild(div);
+  });
+}
+
+function genFieldChange(i,prop,val){
+  if(prop==='inputType'){
+    generalFields[i].inputType=val;
+    // עדכון תצוגת שדה אפשרויות בכל container
+    ['generalFieldsList','all-general-container'].forEach(cid=>{
+      const el=document.getElementById(cid+'_genOpts_'+i);
+      if(el)el.style.display=val==='LIST'?'block':'none';
+    });
+  } else if(prop==='optionsText'){
+    generalFields[i].options=val.split('\n').map(s=>s.trim()).filter(s=>s);
+  } else {
+    generalFields[i][prop]=val;
+  }
+}
+
+/* ══════════════════════════════════════════
+   שדות משתנים
+══════════════════════════════════════════ */
+function addField(data){
+  fields.push(data||{name:'',inputType:'TEXT',options:[],defaultValue:'',isRequired:true,role:'NONE',isLocked:false,isMemoryKey:false});
+  renderFields();
+  if(activeTab==='all')renderFieldsInto('all-fields-container');
+  updateDescVarsBar();
+  updateBadge();
+  setTimeout(()=>{
+    const cards=document.querySelectorAll('#fieldsList .field-card');
+    if(cards.length)cards[cards.length-1].scrollIntoView({behavior:'smooth',block:'center'});
+  },60);
+}
+
+function deleteField(i){
+  if(!confirm('מחק שדה "'+(fields[i].name||'ללא שם')+'"?'))return;
+  fields.splice(i,1);
+  renderFields();
+  if(activeTab==='all')renderFieldsInto('all-fields-container');
+  updateDescVarsBar();
+  updateBadge();
+}
+
+function moveField(i,dir){
+  const j=i+dir;
+  if(j<0||j>=fields.length)return;
+  [fields[i],fields[j]]=[fields[j],fields[i]];
+  renderFields();
+  if(activeTab==='all')renderFieldsInto('all-fields-container');
+  updateDescVarsBar();
+}
+
+function renderFields(){renderFieldsInto('fieldsList');}
+
+function renderFieldsInto(containerId){
+  const c=document.getElementById(containerId);
+  if(!c)return;
+  c.innerHTML='';
+  const emptyEl=document.getElementById('fieldsEmpty');
+  if(emptyEl)emptyEl.style.display=fields.length?'none':'block';
+  fields.forEach((f,i)=>c.appendChild(buildFieldCard(f,i,containerId)));
+}
+
+function buildFieldCard(f,i,prefix){
+  const div=document.createElement('div');
+  div.className='field-card';
+  const itOpts=INPUT_TYPES.map(t=>`<option value="${t.id}" ${t.id===f.inputType?'selected':''}>${t.label}</option>`).join('');
+  const roleOpts=ROLES.map(r=>`<option value="${r.id}" ${r.id===f.role?'selected':''}>${r.label}</option>`).join('');
+  const showOpts=f.inputType==='LIST';
+  const isLoadTable=f.inputType==='LOAD_TABLE';
+  const isFormula=f.inputType==='FORMULA';
+  const isTpl=f.inputType==='TEXT_TEMPLATE';
+  const optsText=(!isLoadTable)?(f.options||[]).join('\n'):'';
+  const defLabel=isTpl?'תבנית טקסט עם משתנים':isFormula?'נוסחה מתמטית':'ערך ברירת מחדל — אופציונלי';
+  const defPH=isTpl?'לדוגמה: {m} ק״ג ועד {a} אנשים':isFormula?'לדוגמה: {h} + 2':'';
+  const defRows=(isTpl||isFormula||f.inputType==='MULTILINE_TEXT')?3:1;
+  const pid=prefix+'_f'+i;
+
+  // LOAD_TABLE config
+  const COL1_OPTS=['ללא','רדיוס','מיקום','מרכז כובד','אחר'];
+  const col1Type=isLoadTable?((f.options&&f.options[0])||'רדיוס'):'רדיוס';
+  const customCol1=isLoadTable?((f.options&&f.options[1])||''):'';
+  const col1LabelMap={'ללא':'ללא (ע.ע.ב בלבד)','רדיוס':"רדיוס (מ')",'מיקום':'מיקום','מרכז כובד':"מרכז כובד (מ')",'אחר':'אחר — כותרת מותאמת'};
+  const col1Display=col1Type==='אחר'?(customCol1||"כותרת אישית")
+    :col1Type==='ללא'?null
+    :(col1LabelMap[col1Type]||col1Type);
+  const col1SelectOpts=COL1_OPTS.map(o=>`<option value="${o}" ${o===col1Type?'selected':''}>${col1LabelMap[o]||o}</option>`).join('');
+
+  const rawDefault=isLoadTable?(f.defaultValue||''):'';
+  const defaultRows=isLoadTable?parseLoadTableDefault(rawDefault):[{c1:'',c2:''}];
+
+  div.innerHTML=`
+    <div class="field-num">שדה ${i+1}${f.name?' — '+esc(f.name):''}</div>
+    <div class="row2">
+      <div>
+        <label class="lbl">שם משתנה <span style="color:#888;font-weight:normal;font-size:11px;">(אנגלית/מספרים + עברית בסוגריים)</span></label>
+        <input type="text" value="${esc(f.name)}" placeholder="לדוגמה: d (סוג הינע) / h1 (גובה הרמה)"
+          oninput="fieldChange(${i},'name',this.value);validateFieldName(${i},this)"
+          onblur="validateFieldName(${i},this)">
+        <div id="fn_err_${i}" style="color:#c62828;font-size:11px;margin-top:2px;display:none;"></div>
+      </div>
+      <div><label class="lbl">סוג קלט</label>
+        <select onchange="fieldChange(${i},'inputType',this.value)">${itOpts}</select></div>
+    </div>
+    <div id="${pid}_opts" style="display:${showOpts?'block':'none'}">
+      <label class="lbl">אפשרויות רשימה (כל אפשרות בשורה)</label>
+      <textarea rows="4" oninput="fieldChange(${i},'optionsText',this.value)">${esc(optsText)}</textarea>
+    </div>
+    <div id="${pid}_loadtable" style="display:${isLoadTable?'block':'none'}">
+      <label class="lbl">הגדרת כותרת טור ראשון</label>
+      <select onchange="fieldChange(${i},'col1Type',this.value)">${col1SelectOpts}</select>
+      <div id="${pid}_customcol1" style="display:${col1Type==='אחר'?'block':'none'}">
+        <label class="lbl">כותרת מותאמת אישית לטור ראשון</label>
+        <input type="text" value="${esc(customCol1)}" placeholder="לדוגמה: זרוע (מ׳)"
+          oninput="fieldChange(${i},'customCol1',this.value)">
+      </div>
+      <label class="lbl" style="margin-top:8px;">ברירות מחדל לשורות הטבלה (יופיעו מוכנות בנייד)</label>
+      <div style="border:1px solid #ddd;border-radius:6px;overflow:hidden;margin-top:4px;">
+        <div style="display:flex;background:#2E7D32;color:white;font-weight:bold;font-size:12px;">
+          ${col1Display?`<div style="flex:1;padding:5px 8px;text-align:center;border-left:1px solid rgba(255,255,255,.3);">${esc(col1Display)}</div>`:''}
+          <div style="flex:1;padding:5px 8px;text-align:center;">ע.ע.ב (ק"ג)</div>
+          <div style="width:34px;"></div>
+        </div>
+        ${defaultRows.map((row,idx)=> row.c1==='h' ? `
+          <div style="display:flex;gap:4px;padding:4px 6px;border-top:1px solid #e0e0e0;align-items:center;background:#E8F5E9;">
+            <div style="flex:1;">
+              <input type="text" value="${esc(row.c2)}" placeholder="טקסט כותרת ביניים..."
+                style="font-weight:bold;background:#E8F5E9;"
+                oninput="loadTableRowChange(${i},${idx},'c2',this.value)">
+            </div>
+            <div style="width:34px;text-align:center;">
+              <button class="btn btn-danger btn-sm" style="padding:2px 7px;" onclick="loadTableDeleteRow(${i},${idx})">✕</button>
+            </div>
+          </div>` : `
+          <div style="display:flex;gap:4px;padding:4px 4px 4px 6px;border-top:1px solid #e0e0e0;align-items:center;">
+            ${col1Display?`<div style="flex:1;"><input type="text" value="${esc(row.c1)}" placeholder="${esc(col1Display)}"
+              oninput="loadTableRowChange(${i},${idx},'c1',this.value)"></div>`:''}
+            <div style="flex:1;"><input type="text" value="${esc(row.c2)}" placeholder="ע.ע.ב"
+              oninput="loadTableRowChange(${i},${idx},'c2',this.value)"></div>
+            <div style="width:34px;text-align:center;">${defaultRows.filter(r=>r.c1!=='h').length>1?
+              `<button class="btn btn-danger btn-sm" style="padding:2px 7px;" onclick="loadTableDeleteRow(${i},${idx})">✕</button>`:''}</div>
+          </div>`).join('')}
+        <div style="padding:4px 8px;border-top:1px solid #e0e0e0;display:flex;gap:6px;">
+          <button class="btn btn-outline btn-sm" style="flex:1;" onclick="loadTableAddRow(${i})">+ הוסף שורה</button>
+          <button class="btn btn-outline btn-sm" style="flex:1;border-color:#2E7D32;color:#2E7D32;" onclick="loadTableAddHeaderRow(${i})">+ הוסף כותרת</button>
+        </div>
+      </div>
+    </div>
+    <div style="display:${isLoadTable?'none':'block'}">
+      <label class="lbl">${defLabel}</label>
+      <textarea rows="${defRows}" dir="${isFormula?'ltr':'rtl'}" placeholder="${defPH}"
+        oninput="fieldChange(${i},'defaultValue',this.value)">${esc(f.defaultValue||'')}</textarea>
+    </div>
+    <div><label class="lbl">תפקיד בתסקיר</label>
+      <select onchange="fieldChange(${i},'role',this.value)">${roleOpts}</select></div>
+    <div class="row2">
+      <label class="chk-row">
+        <input type="checkbox" ${f.isRequired?'checked':''} onchange="fieldChange(${i},'isRequired',this.checked)">
+        שדה חובה
+      </label>
+      <label class="chk-row">
+        <input type="checkbox" ${f.isLocked?'checked':''} onchange="fieldChange(${i},'isLocked',this.checked)">
+        שדה נעול
+      </label>
+      <label class="chk-row">
+        <input type="checkbox" ${f.isMemoryKey?'checked':''} onchange="fieldChange(${i},'isMemoryKey',this.checked)">
+        מפתח זיכרון
+      </label>
+    </div>
+    <div class="field-actions">
+      ${i>0?`<button class="btn btn-gray btn-sm btn-icon" onclick="moveField(${i},-1)" title="הזז למעלה">↑</button>`:''}
+      ${i<fields.length-1?`<button class="btn btn-gray btn-sm btn-icon" onclick="moveField(${i},1)" title="הזז למטה">↓</button>`:''}
+      <button class="btn btn-danger btn-sm" onclick="deleteField(${i})">מחק שדה</button>
+    </div>`;
+  return div;
+}
+
+function validateFieldName(i,input){
+  const val=(input?input.value:fields[i].name)||'';
+  const trimmed=val.trimEnd();
+  const errEl=document.getElementById('fn_err_'+i);
+  if(!errEl)return;
+  if(!trimmed){errEl.style.display='none';return;}
+  const firstToken=trimmed.split(' ')[0];
+  const ok=/^[A-Za-z][A-Za-z0-9]*$/.test(firstToken);
+  if(ok){
+    errEl.style.display='none';
+    if(input)input.style.borderColor='';
+  } else {
+    errEl.textContent='שם המשתנה חייב להתחיל באנגלית/מספרים. לדוגמה: d (סוג הינע) / h1 (גובה הרמה)';
+    errEl.style.display='block';
+    if(input)input.style.borderColor='#c62828';
+  }
+}
+
+function fieldChange(i,prop,val){
+  if(prop==='inputType'){
+    fields[i].inputType=val;
+    if(val==='LOAD_TABLE'&&(!fields[i].options||!fields[i].options.length)){
+      fields[i].options=['רדיוס'];
+    }
+    renderFields();
+    if(activeTab==='all')renderFieldsInto('all-fields-container');
+    updateDescVarsBar();
+  } else if(prop==='col1Type'){
+    if(!fields[i].options)fields[i].options=[];
+    fields[i].options[0]=val;
+    if(val!=='אחר')fields[i].options.splice(1);
+    renderFields();
+    if(activeTab==='all')renderFieldsInto('all-fields-container');
+  } else if(prop==='customCol1'){
+    if(!fields[i].options)fields[i].options=['אחר'];
+    fields[i].options[1]=val;
+  } else if(prop==='optionsText'){
+    fields[i].options=val.split('\n').map(s=>s.trim()).filter(s=>s);
+  } else if(prop==='isRequired'||prop==='isLocked'){
+    fields[i][prop]=val;
+  } else {
+    fields[i][prop]=val;
+    if(prop==='name')updateDescVarsBar();
+  }
+}
+
+function updateBadge(){
+  const b=document.getElementById('fieldsBadge');
+  if(b)b.textContent=fields.length;
+}
+
+/* ══════════════════════════════════════════
+   פרטי מכונה
+══════════════════════════════════════════ */
+function addDetailsRow(){
+  if(detailsRows.length>=4){showToast('ניתן להוסיף עד 4 שורות בלבד');return;}
+  detailsRows.push({cells:['empty','empty','empty']});
+  renderDetailsRows();
+  if(activeTab==='all')renderDetailsInto('all-details-container');
+}
+function deleteDetailsRow(i){
+  if(detailsRows.length<=1){showToast('חייבת להיות לפחות שורה אחת');return;}
+  detailsRows.splice(i,1);
+  renderDetailsRows();
+  if(activeTab==='all')renderDetailsInto('all-details-container');
+}
+function resetDetailsRows(){
+  detailsRows=JSON.parse(JSON.stringify(DEFAULT_ROWS));
+  renderDetailsRows();
+  if(activeTab==='all')renderDetailsInto('all-details-container');
+  showToast('אופס לברירת מחדל');
+}
+function renderDetailsRows(){renderDetailsInto('detailsRowsList');}
+function renderDetailsInto(cid){
+  const c=document.getElementById(cid);if(!c)return;c.innerHTML='';
+  const pos=['תא ימין','תא אמצע','תא שמאל'];
+  detailsRows.forEach((row,ri)=>{
+    const d=document.createElement('div');d.className='details-card';
+    const delBtn=detailsRows.length>1
+      ?`<button class="btn btn-danger btn-sm" onclick="deleteDetailsRow(${ri})">מחק</button>`:'';
+    const cells=[0,1,2].map(ci=>{
+      const val=(row.cells||[])[ci]||'empty';
+      const opts=DETAILS_OPTS.map(o=>`<option value="${o.key}" ${o.key===val?'selected':''}>${o.label}</option>`).join('');
+      return `<div><label class="lbl">${pos[ci]}</label>
+        <select onchange="updateDetailsCell(${ri},${ci},this.value)">${opts}</select></div>`;
+    }).join('');
+    d.innerHTML=`<div class="details-card-header"><span>שורה ${ri+1}</span>${delBtn}</div>
+      <div class="row3">${cells}</div>`;
+    c.appendChild(d);
+  });
+}
+function updateDetailsCell(ri,ci,val){
+  if(!detailsRows[ri].cells)detailsRows[ri].cells=['empty','empty','empty'];
+  detailsRows[ri].cells[ci]=val;
+}
+
+/* ══════════════════════════════════════════
+   תבנית תיאור
+══════════════════════════════════════════ */
+function renderDescInto(cid){
+  const c=document.getElementById(cid);if(!c)return;
+  c.innerHTML=`
+    <div class="card">
+      <div class="card-body">
+        <p class="hint">לחץ על שם שדה להוסיפו, או כתוב <code>{שם השדה}</code> ישירות.</p>
+        <div class="vars-bar" id="${cid}_varsBar"></div>
+        <textarea id="${cid}_ta" rows="5"
+          placeholder="לדוגמה: פיגום תלוי, {מספר נקודות} נקודות תילוי, יצרן {יצרן}."></textarea>
+      </div>
+    </div>`;
+  // sync value
+  const mainTa=document.getElementById('descriptionTemplate');
+  const ta=document.getElementById(cid+'_ta');
+  if(ta&&mainTa)ta.value=mainTa.value;
+  if(ta)ta.oninput=()=>{if(mainTa)mainTa.value=ta.value;};
+  buildVarsBar(cid+'_varsBar',cid+'_ta');
+}
+
+function updateDescVarsBar(){
+  buildVarsBar('descVarsBar','descriptionTemplate');
+  if(activeTab==='all'){
+    buildVarsBar('all-desc-container_varsBar','all-desc-container_ta');
+  }
+  updateBadge();
+}
+
+function buildVarsBar(barId,taId){
+  const bar=document.getElementById(barId);if(!bar)return;
+  bar.innerHTML='';
+  fields.map(f=>f.name).filter(n=>n.trim()).forEach(name=>{
+    const b=document.createElement('button');
+    b.className='var-chip';b.textContent='{'+name+'}';
+    b.onclick=()=>insertVar('{'+name+'}',taId);
+    bar.appendChild(b);
+  });
+  ['d','manufacturer','model','serial'].forEach(v=>{
+    const b=document.createElement('button');
+    b.className='var-chip sys';b.textContent='{'+v+'}';b.title='משתנה מערכת';
+    b.onclick=()=>insertVar('{'+v+'}',taId);
+    bar.appendChild(b);
+  });
+}
+
+function insertVar(v,taId){
+  const ta=document.getElementById(taId||'descriptionTemplate');if(!ta)return;
+  const s=ta.selectionStart,e=ta.selectionEnd;
+  ta.value=ta.value.slice(0,s)+v+ta.value.slice(e);
+  ta.selectionStart=ta.selectionEnd=s+v.length;ta.focus();
+  // sync main
+  const main=document.getElementById('descriptionTemplate');
+  if(main&&ta!==main)main.value=ta.value;
+}
+
+/* ══════════════════════════════════════════
+   ייצוא / ייבוא
+══════════════════════════════════════════ */
+function buildTemplate(){
+  // sync desc from all-tab if needed
+  const allTa=document.getElementById('all-desc-container_ta');
+  const mainTa=document.getElementById('descriptionTemplate');
+  if(allTa&&mainTa&&allTa.value)mainTa.value=allTa.value;
+
+  return{
+    typeName: document.getElementById('typeName').value.trim(),
+    descriptionTemplate: (mainTa?mainTa.value:'').trim(),
+    fields: fields.filter(f=>f.name.trim()),
+    generalFields: generalFields,
+    machineDetailsRows: detailsRows
+  };
+}
+
+function validate(t){
+  if(!t.typeName)return'יש להזין שם סוג מכונת ההרמה.';
+  if(!t.fields||!t.fields.length)return'יש להוסיף לפחות שדה אחד.';
+  if(!t.descriptionTemplate)return'יש להזין תבנית תיאור.';
+  return null;
+}
+
+/* ══════════════════════════════════════════
+   ניהול Bundle
+══════════════════════════════════════════ */
+function updateBundlePanel(){
+  const p=document.getElementById('bundle-panel');
+  if(!p)return;
+  if(templateBundle.length<2){p.style.display='none';return;}
+  p.style.display='block';
+  const sel=document.getElementById('bundle-select');
+  sel.innerHTML=templateBundle.map((t,i)=>`<option value="${i}">${esc(t.typeName||'תבנית '+(i+1))}</option>`).join('');
+  sel.value=String(Math.max(0,bundleCurrentIdx));
+  document.getElementById('bundle-count').textContent=`(${templateBundle.length} תבניות)`;
+}
+function saveToBundleBeforeSwitch(){
+  if(templateBundle.length<2||bundleCurrentIdx<0||bundleCurrentIdx>=templateBundle.length)return;
+  templateBundle[bundleCurrentIdx]={version:1,type:'machine_smart_template',...buildTemplate()};
+}
+function switchBundleTemplate(idx){
+  saveToBundleBeforeSwitch();
+  if(idx<0||idx>=templateBundle.length)return;
+  bundleCurrentIdx=idx;
+  document.getElementById('bundle-select').value=String(idx);
+  loadFromData(templateBundle[idx]);
+}
+
+function exportJson(){
+  saveToBundleBeforeSwitch();
+  const safe=name=>String(name||'template').replace(/[^א-תa-zA-Z0-9_-]/g,'_');
+  if(templateBundle.length>1){
+    // ייצוא bundle שלם
+    const data={exportVersion:1,exportType:'machine_templates_bundle',
+      exportDate:new Date().toISOString().slice(0,10),templates:templateBundle};
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='machine_templates_bundle.json';
+    a.click();URL.revokeObjectURL(url);
+    showToast('יוצא bundle עם '+templateBundle.length+' תבניות ✓');
+    return;
+  }
+  const t=buildTemplate();
+  const err=validate(t);
+  if(err){
+    document.getElementById('errorMsg').textContent=err;
+    showToast(err,'err');
+    switchTab('desc',document.querySelectorAll('.tab-btn')[4]);
+    return;
+  }
+  document.getElementById('errorMsg').textContent='';
+  const data={version:1,type:'machine_smart_template',...t};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='machine_template_'+safe(t.typeName)+'.json';
+  a.click();URL.revokeObjectURL(url);
+  showToast('יוצא: machine_template_'+safe(t.typeName)+'.json ✓');
+}
+
+function importJson(ev){
+  const file=ev.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const parsed=JSON.parse(e.target.result);
+      if(parsed.exportVersion && Array.isArray(parsed.templates) && parsed.templates.length>0){
+        templateBundle=parsed.templates.slice();
+        bundleCurrentIdx=0;
+        loadFromData(templateBundle[0]);
+        updateBundlePanel();
+        showToast('נטענו '+templateBundle.length+' תבניות. עורכים: "'+templateBundle[0].typeName+'" ✓');
+      } else {
+        templateBundle=[];bundleCurrentIdx=-1;
+        loadFromData(parsed);
+        updateBundlePanel();
+        showToast('התבנית "'+( parsed.typeName||'') +'" נטענה ✓');
+      }
+    }catch(err){showToast('שגיאה בקריאת הקובץ: '+err.message,'err');}
+  };
+  r.readAsText(file,'utf-8');
+  ev.target.value='';
+}
+
+function loadFromData(d){
+  document.getElementById('typeName').value=d.typeName||'';
+  document.getElementById('descriptionTemplate').value=d.descriptionTemplate||'';
+  if(Array.isArray(d.fields))
+    fields=d.fields.map(f=>({
+      name:f.name||'',inputType:f.inputType||'TEXT',
+      options:Array.isArray(f.options)?f.options:[],
+      defaultValue:f.defaultValue||'',
+      isRequired:f.isRequired!==false,role:f.role||'NONE',isLocked:!!f.isLocked,isMemoryKey:!!f.isMemoryKey
+    }));
+  if(Array.isArray(d.generalFields))
+    generalFields=d.generalFields.map(g=>({
+      id:g.id||'',label:g.label||'',inputType:g.inputType||'TEXT',
+      isRequired:g.isRequired!==false,options:Array.isArray(g.options)?g.options:[]
+    }));
+  else generalFields=JSON.parse(JSON.stringify(DEFAULT_GEN));
+  if(Array.isArray(d.machineDetailsRows))
+    detailsRows=d.machineDetailsRows.map(r=>({cells:Array.isArray(r.cells)?r.cells.slice(0,3):['empty','empty','empty']}));
+  else detailsRows=JSON.parse(JSON.stringify(DEFAULT_ROWS));
+  renderAll();updateBadge();
+}
+
+function resetAll(){
+  if(!confirm('למחוק הכל ולהתחיל מחדש?'))return;
+  document.getElementById('typeName').value='';
+  document.getElementById('descriptionTemplate').value='';
+  fields=[{name:'תיאור כללי',inputType:'TEXT',options:[],defaultValue:'',isRequired:true,role:'NONE',isLocked:false,isMemoryKey:false}];
+  templateBundle=[];bundleCurrentIdx=-1;updateBundlePanel();
+  generalFields=JSON.parse(JSON.stringify(DEFAULT_GEN));
+  detailsRows=JSON.parse(JSON.stringify(DEFAULT_ROWS));
+  renderAll();updateBadge();showToast('הטופס נוקה');
+}
+
+/* ══════════════════════════════════════════
+   עזר
+══════════════════════════════════════════ */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+let _tt=null;
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast'+(type==='err'?' err':'');
+  t.classList.add('show');
+  if(_tt)clearTimeout(_tt);
+  _tt=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+/* ══════════════════════════════════════════
+   טבלת עומסים — עזר
+══════════════════════════════════════════ */
+function parseLoadTableDefault(raw){
+  if(!raw||!raw.trim())return[{c1:'',c2:''}];
+  return raw.split('|').map(row=>{const p=row.split(':',2);return{c1:p[0]||'',c2:p[1]||''};});
+}
+function loadTableSerialize(rows){return rows.map(r=>r.c1+':'+r.c2).join('|');}
+function loadTableRowChange(fi,ri,col,val){
+  const rows=parseLoadTableDefault(fields[fi].defaultValue||'');
+  while(rows.length<=ri)rows.push({c1:'',c2:''});
+  rows[ri][col]=val;
+  fields[fi].defaultValue=loadTableSerialize(rows);
+}
+function loadTableAddRow(fi){
+  const rows=parseLoadTableDefault(fields[fi].defaultValue||'');
+  rows.push({c1:'',c2:''});
+  fields[fi].defaultValue=loadTableSerialize(rows);
+  renderFields();if(activeTab==='all')renderFieldsInto('all-fields-container');
+}
+function loadTableAddHeaderRow(fi){
+  const rows=parseLoadTableDefault(fields[fi].defaultValue||'');
+  rows.push({c1:'h',c2:''});
+  fields[fi].defaultValue=loadTableSerialize(rows);
+  renderFields();if(activeTab==='all')renderFieldsInto('all-fields-container');
+}
+function loadTableDeleteRow(fi,ri){
+  const rows=parseLoadTableDefault(fields[fi].defaultValue||'');
+  const dataRows=rows.filter(r=>r.c1!=='h');
+  if(dataRows.length<=1&&rows[ri].c1!=='h')return;
+  rows.splice(ri,1);
+  fields[fi].defaultValue=loadTableSerialize(rows);
+  renderFields();if(activeTab==='all')renderFieldsInto('all-fields-container');
+}
+
+init();
+</script>
+</body>
+</html>

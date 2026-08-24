@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "891995500006",
+    "project_id": "liftinginspection",
+    "storage_bucket": "liftinginspection.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:891995500006:android:fbdb850187c27361423a27",
+        "android_client_info": {
+          "package_name": "com.example.liftinginspection"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQK8FmzwsIw7qL8f3o0vyionqWU8L136o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

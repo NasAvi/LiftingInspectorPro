@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>עורך תבניות אביזרי הרמה</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;background:#ECEFF1;color:#1a1a1a;direction:rtl;min-height:100vh;}
+.app-header{background:#1B5E20;color:white;padding:14px 20px 10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,0.3);}
+.app-header h1{font-size:20px;font-weight:bold;text-align:center;margin-bottom:10px;}
+.header-row{display:flex;align-items:center;gap:10px;}
+.header-row label{font-size:12px;opacity:0.85;white-space:nowrap;}
+.header-row input{flex:1;padding:7px 10px;border:none;border-radius:6px;font-size:15px;font-family:Arial;direction:rtl;background:rgba(255,255,255,0.15);color:white;}
+.header-row input::placeholder{color:rgba(255,255,255,0.55);}
+.header-row input:focus{outline:none;background:rgba(255,255,255,0.25);}
+.tab-bar{display:flex;gap:6px;overflow-x:auto;padding:10px 14px 0;background:#1B5E20;scrollbar-width:none;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab-btn{padding:8px 16px;border:none;border-radius:8px 8px 0 0;font-size:13px;font-family:Arial;cursor:pointer;background:rgba(255,255,255,0.18);color:rgba(255,255,255,0.85);white-space:nowrap;transition:all 0.2s;flex-shrink:0;}
+.tab-btn:hover{background:rgba(255,255,255,0.28);}
+.tab-btn.active{background:#ECEFF1;color:#1B5E20;font-weight:bold;}
+.tab-badge{background:#A34840;color:white;border-radius:10px;padding:1px 6px;font-size:10px;margin-right:4px;}
+.content{padding:18px 16px 100px;max-width:820px;margin:0 auto;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.card{background:white;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,0.10);margin-bottom:14px;overflow:hidden;}
+.card-header{background:#2E7D32;color:white;padding:10px 14px;font-size:14px;font-weight:bold;display:flex;align-items:center;justify-content:space-between;}
+.card-body{padding:14px;}
+.hint{font-size:12px;color:#777;margin-bottom:10px;line-height:1.6;}
+.lbl{display:block;font-size:12px;font-weight:bold;color:#555;margin-bottom:3px;margin-top:8px;}
+.lbl:first-child{margin-top:0;}
+input[type=text],textarea,select{width:100%;padding:8px 10px;border:1.5px solid #ccc;border-radius:6px;font-size:13px;font-family:Arial;direction:rtl;background:white;}
+input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:#2E7D32;}
+textarea{resize:vertical;line-height:1.5;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.chk-row{display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;padding:3px 0;}
+.chk-row input[type=checkbox]{width:auto;margin:0;}
+.chk-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 16px;margin-top:8px;}
+.btn{padding:8px 18px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-family:Arial;font-weight:bold;transition:all 0.15s;}
+.btn-green{background:#2E7D32;color:white;}
+.btn-green:hover{background:#1B5E20;}
+.btn-outline{background:transparent;color:#2E7D32;border:1.5px solid #2E7D32;}
+.btn-outline:hover{background:#E8F5E9;}
+.btn-red{background:#C62828;color:white;}
+.btn-red:hover{background:#B71C1C;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.field-card{background:white;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.12);margin-bottom:10px;overflow:hidden;border-right:4px solid #2E7D32;}
+.field-card.formula-card{border-color:#E65100;}
+.field-header{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#F1F8E9;}
+.field-header.formula-header{background:#FFF3E0;}
+.field-num{font-size:11px;color:#888;min-width:22px;}
+.field-title{font-weight:bold;font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.field-title.formula-title{color:#E65100;}
+.move-btn{background:none;border:1px solid #ccc;border-radius:4px;cursor:pointer;font-size:12px;padding:2px 7px;color:#555;}
+.move-btn:hover{background:#eee;}
+.del-btn{background:none;border:none;cursor:pointer;font-size:16px;color:#B71C1C;padding:2px 6px;}
+.field-body{padding:12px;display:none;}
+.field-body.open{display:block;}
+.expand-btn{background:none;border:none;cursor:pointer;font-size:12px;color:#2E7D32;padding:2px 6px;}
+.opt-hint{font-size:11px;color:#888;margin-top:4px;line-height:1.5;}
+.vars-bar{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.var-chip{background:#E8F5E9;border:1px solid #A5D6A7;border-radius:12px;padding:3px 10px;font-size:11px;cursor:pointer;user-select:none;}
+.var-chip:hover{background:#C8E6C9;}
+.io-zone{border:2px dashed #A5D6A7;border-radius:10px;padding:30px;text-align:center;background:#F9FFF9;margin-bottom:16px;cursor:pointer;transition:background 0.2s;}
+.io-zone:hover,.io-zone.drag-over{background:#E8F5E9;}
+.io-zone p{font-size:14px;color:#555;margin:8px 0;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:white;padding:10px 22px;border-radius:20px;font-size:13px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;}
+.toast.show{opacity:1;}
+.section-title{font-weight:bold;font-size:15px;color:#1B5E20;margin:16px 0 8px;border-bottom:2px solid #A5D6A7;padding-bottom:4px;}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ccc;padding:10px 16px;display:flex;justify-content:center;gap:12px;z-index:100;}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>עורך תבניות אביזרי הרמה</h1>
+  <div class="header-row">
+    <label>שם סוג:</label>
+    <input type="text" id="typeName" placeholder="לדוגמה: מענבי שרשרת / וו הרמה / מלחציים...">
+  </div>
+</div>
+
+<!-- Bundle selector panel -->
+<div id="bundle-panel" style="display:none;background:#0D47A1;padding:8px 14px;">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span style="color:white;font-size:12px;white-space:nowrap;font-weight:bold;">תבנית:</span>
+    <select id="bundle-select" onchange="switchBundleTemplate(parseInt(this.value))"
+      style="flex:1;padding:5px 8px;border:none;border-radius:6px;font-size:13px;font-family:Arial;direction:rtl;min-width:0;"></select>
+    <span id="bundle-count" style="color:rgba(255,255,255,0.7);font-size:11px;white-space:nowrap;"></span>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('all',this)">הכל</button>
+  <button class="tab-btn" onclick="switchTab('fields',this)">שדות <span class="tab-badge" id="badge-fields">0</span></button>
+  <button class="tab-btn" onclick="switchTab('formulas',this)">חישובים <span class="tab-badge" id="badge-formulas">0</span></button>
+  <button class="tab-btn" onclick="switchTab('desc',this)">תיאור</button>
+  <button class="tab-btn" onclick="switchTab('io',this)">ייצוא / ייבוא</button>
+</div>
+
+<div class="content">
+
+  <!-- TAB: הכל -->
+  <div id="tab-all" class="tab-panel active">
+    <div class="section-title">שדות</div>
+    <div id="all-fields-list"></div>
+    <button class="btn btn-outline btn-sm" onclick="addField()">+ הוסף שדה</button>
+    <div class="section-title" style="margin-top:20px;">חישובים חכמים</div>
+    <div id="all-formulas-list"></div>
+    <button class="btn btn-outline btn-sm" style="border-color:#E65100;color:#E65100;" onclick="addFormula()">+ הוסף חישוב</button>
+    <div class="section-title" style="margin-top:20px;">תבנית תיאור</div>
+    <div id="all-desc-wrap"></div>
+  </div>
+
+  <!-- TAB: שדות -->
+  <div id="tab-fields" class="tab-panel">
+    <div class="card"><div class="card-body">
+      <p class="hint">כל שדה = עמודה / פרט בטסקיר. ניתן להגדיר שם, סוג קלט, ברירת מחדל, תפקיד ועוד.</p>
+      <div id="fields-list"></div>
+      <button class="btn btn-outline btn-sm" onclick="addField()">+ הוסף שדה</button>
+    </div></div>
+  </div>
+
+  <!-- TAB: חישובים -->
+  <div id="tab-formulas" class="tab-panel">
+    <div class="card"><div class="card-body">
+      <p class="hint">חישוב חכם = נוסחה שמחשבת ערך אוטומטית. שדה יעד <strong>ע.ע.ב</strong> — ניתן להשאיר נוסחה ריקה לשליטה בספרות בלבד.</p>
+      <div id="formulas-list"></div>
+      <button class="btn btn-sm" style="background:#E65100;color:white;" onclick="addFormula()">+ הוסף חישוב</button>
+    </div></div>
+  </div>
+
+  <!-- TAB: תיאור -->
+  <div id="tab-desc" class="tab-panel">
+    <div class="card"><div class="card-body">
+      <label class="lbl">תבנית תיאור האביזר (שימוש ב-{שם_שדה} להכנסת ערכים)</label>
+      <textarea id="descriptionTemplate" rows="4" placeholder="לדוגמה: מענב שרשרת {מספר ענפים} {קוטר}מ&quot;מ..."></textarea>
+      <p class="hint" style="margin-top:6px;">לחץ על שם שדה להכנסה אוטומטית:</p>
+      <div class="vars-bar" id="desc-vars-bar"></div>
+    </div></div>
+  </div>
+
+  <!-- TAB: ייצוא/ייבוא -->
+  <div id="tab-io" class="tab-panel">
+    <div class="card"><div class="card-body">
+      <p class="hint"><strong>ייצוא:</strong> שמירת התבנית כקובץ JSON לייבוא חזרה לנייד דרך "ייבוא JSON מהמחשב" בעורך התבניות.</p>
+      <button class="btn btn-green" onclick="exportJson()" style="width:100%">⬇ ייצוא תבנית כ-JSON</button>
+    </div></div>
+
+    <div class="card" style="margin-top:14px;"><div class="card-body">
+      <p class="hint"><strong>ייבוא:</strong> טען תבנית ממכשיר (JSON שיוצא מהנייד) או גרור קובץ לאזור הבא:</p>
+      <div class="io-zone" id="drop-zone"
+        ondragover="event.preventDefault();this.classList.add('drag-over');"
+        ondragleave="this.classList.remove('drag-over');"
+        ondrop="handleDrop(event)">
+        <p>📂 גרור לכאן קובץ JSON של תבנית</p>
+        <p>או</p>
+        <input type="file" id="importFile" accept="application/json" style="display:none" onchange="handleFile(this.files[0])">
+        <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">בחר קובץ...</button>
+      </div>
+    </div></div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- Bottom action bar -->
+<div class="bottom-bar">
+  <button class="btn btn-outline" onclick="clearAll()">נקה הכל</button>
+  <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">⬆ ייבוא</button>
+  <button class="btn btn-green" onclick="exportJson()">⬇ ייצוא JSON</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════
+   CONSTANTS
+═══════════════════════════════════════ */
+const INPUT_TYPES = [
+  {id:'LIST',           label:'רשימה נפתחת'},
+  {id:'TEXT',           label:'טקסט חופשי'},
+  {id:'MULTILINE_TEXT', label:'טקסט רב שורות'},
+  {id:'TEXT_TEMPLATE',  label:'טקסט עם משתנים'},
+  {id:'INTEGER',        label:'מספר שלם'},
+  {id:'DECIMAL',        label:'מספר עשרוני'},
+  {id:'BOOLEAN',        label:'כן / לא (צ׳קבוקס)'},
+  {id:'DATE',           label:'תאריך'},
+  {id:'READ_ONLY',      label:'מחושב — תוצאה (לקריאה)'},
+  {id:'FORMULA',        label:'מחושב — נוסחה'},
+];
+
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+let fields   = [];
+let formulas = [];
+let activeTab = 'all';
+let templateBundle = [];
+let bundleCurrentIdx = -1;
+
+/* ═══════════════════════════════════════
+   TABS
+═══════════════════════════════════════ */
+function switchTab(id, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  activeTab = id;
+  renderAll();
+}
+function renderAll(){
+  renderFieldsInto('all-fields-list');
+  renderFormulasInto('all-formulas-list');
+  renderFieldsInto('fields-list');
+  renderFormulasInto('formulas-list');
+  updateDescVarsBar('desc-vars-bar');
+  renderDescInto('all-desc-wrap');
+  updateBadges();
+}
+function renderDescInto(containerId){
+  const c = document.getElementById(containerId); if(!c) return;
+  c.innerHTML = `<label class="lbl">תבנית תיאור (לחץ על שדה להוספה)</label>
+    <textarea rows="3" oninput="document.getElementById('descriptionTemplate').value=this.value;renderAll()"
+      id="${containerId}_ta">${esc(document.getElementById('descriptionTemplate').value)}</textarea>
+    <div class="vars-bar" id="${containerId}_vars"></div>`;
+  updateDescVarsBar(containerId+'_vars', containerId+'_ta');
+}
+function updateDescVarsBar(barId, taId){
+  const bar = document.getElementById(barId||'desc-vars-bar'); if(!bar) return;
+  const mainTa = taId ? document.getElementById(taId) : document.getElementById('descriptionTemplate');
+  bar.innerHTML = fields
+    .filter(f=>f.name.trim())
+    .map(f=>`<span class="var-chip" onclick="insertVar('${esc(f.name)}','${barId||'desc-vars-bar'}','${taId||'descriptionTemplate'}')">{${f.name}}</span>`)
+    .join('');
+}
+function insertVar(name, barId, taId){
+  const ta = document.getElementById(taId); if(!ta) return;
+  const pos = ta.selectionStart;
+  const val = ta.value;
+  ta.value = val.slice(0,pos) + '{'+name+'}' + val.slice(ta.selectionEnd);
+  ta.selectionStart = ta.selectionEnd = pos + name.length + 2;
+  ta.focus();
+  // sync main textarea
+  document.getElementById('descriptionTemplate').value = document.getElementById(taId).value;
+}
+function updateBadges(){
+  document.getElementById('badge-fields').textContent  = fields.filter(f=>f.name.trim()).length;
+  document.getElementById('badge-formulas').textContent = formulas.filter(f=>f.name.trim()).length;
+}
+
+/* ═══════════════════════════════════════
+   FIELDS
+═══════════════════════════════════════ */
+function addField(data){
+  fields.push(data || {name:'',inputType:'TEXT',options:[],defaultValue:'',isRequired:false,isMemoryKey:false,inDescription:true,isSeparateColumn:false,isForCalculation:false,isScannable:false,_open:true});
+  renderAll();
+}
+function removeField(i){ fields.splice(i,1); renderAll(); }
+function moveField(i, dir){ const j=i+dir; if(j<0||j>=fields.length) return; [fields[i],fields[j]]=[fields[j],fields[i]]; renderAll(); }
+function fieldChange(i, prop, val){
+  fields[i][prop] = val;
+  if(prop==='name') updateBadges();
+  if(prop==='inputType') renderAll();
+}
+function fieldOptChange(i, val){
+  fields[i].options = val.split('\n').map(s=>s.trim()).filter(s=>s);
+}
+function toggleField(i){
+  fields[i]._open = !fields[i]._open;
+  renderAll();
+}
+
+function renderFieldsInto(containerId){
+  const c = document.getElementById(containerId); if(!c) return;
+  c.innerHTML = '';
+  if(!fields.length){ c.innerHTML='<p style="color:#999;font-size:13px;text-align:center;padding:10px 0;">אין שדות עדיין — לחץ "הוסף שדה"</p>'; return; }
+  fields.forEach((f,i)=>{
+    const typeLabel = (INPUT_TYPES.find(t=>t.id===f.inputType)||{label:f.inputType}).label;
+    const isList = f.inputType==='LIST';
+    const isFormType = f.inputType==='READ_ONLY'||f.inputType==='FORMULA';
+    const div = document.createElement('div');
+    div.className = 'field-card';
+    div.innerHTML = `
+      <div class="field-header">
+        <span class="field-num">${i+1}</span>
+        <span class="field-title">${esc(f.name)||'<em style="color:#999">שדה ללא שם</em>'}</span>
+        <span style="font-size:11px;color:#888;">${typeLabel}</span>
+        <button class="move-btn" onclick="moveField(${i},-1)" title="הזז למעלה">▲</button>
+        <button class="move-btn" onclick="moveField(${i},1)" title="הזז למטה">▼</button>
+        <button class="expand-btn" onclick="toggleField(${i})">${f._open?'▲ סגור':'▼ פתח'}</button>
+        <button class="del-btn" onclick="removeField(${i})" title="מחק שדה">✕</button>
+      </div>
+      <div class="field-body${f._open?' open':''}">
+        <div class="row2">
+          <div>
+            <label class="lbl">שם השדה</label>
+            <input type="text" value="${esc(f.name)}" placeholder="לדוגמה: קוטר, מספר ענפים..."
+              oninput="fieldChange(${i},'name',this.value)">
+          </div>
+          <div>
+            <label class="lbl">סוג קלט</label>
+            <select onchange="fieldChange(${i},'inputType',this.value)">
+              ${INPUT_TYPES.map(t=>`<option value="${t.id}"${t.id===f.inputType?' selected':''}>${t.label}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        ${isList ? `
+        <label class="lbl">הגדרת כותרת רשימה</label>
+        <input type="text" value="${esc(f.defaultValue)}" placeholder="ברירת מחדל (ריק = ללא)"
+          oninput="fieldChange(${i},'defaultValue',this.value)">
+        <label class="lbl">שורות ברירת מחדל לרשימה (כל שורה = אפשרות. ניתן לפורמט "טקסט,0.8" עם מקדם)</label>
+        <textarea rows="4" oninput="fieldOptChange(${i},this.value)"
+          placeholder="לדוגמה:\nשרוול לחיצה,0.8\nשרוול יציקה,0.9\nמהדקי כבל,0.5\nאחר">${esc(f.options.join('\n'))}</textarea>
+        <p class="opt-hint">💡 פורמט "טקסט,מקדם" — הטקסט מוצג לבודק; המקדם משמש לחישוב ע.ע.ב אוטומטי.</p>
+        ` : ''}
+        ${isFormType ? `
+        <label class="lbl">נוסחה (ביטוי ניתן לחישוב, השתמש ב-{שם_שדה})</label>
+        <input type="text" value="${esc(f.defaultValue)}" placeholder="לדוגמה: {קוטר}*{קוטר}*32/1000"
+          oninput="fieldChange(${i},'defaultValue',this.value)">
+        ` : ''}
+        <div class="chk-grid">
+          <label class="chk-row"><input type="checkbox"${f.isRequired?' checked':''} onchange="fieldChange(${i},'isRequired',this.checked)"> שדה חובה</label>
+          <label class="chk-row"><input type="checkbox"${f.inDescription?' checked':''} onchange="fieldChange(${i},'inDescription',this.checked)"> מופיע בתיאור האביזר</label>
+          <label class="chk-row"><input type="checkbox"${f.isSeparateColumn?' checked':''} onchange="fieldChange(${i},'isSeparateColumn',this.checked)"> עמודה נפרדת בתסקיר</label>
+          <label class="chk-row"><input type="checkbox"${f.isForCalculation?' checked':''} onchange="fieldChange(${i},'isForCalculation',this.checked)"> משמש לחישוב</label>
+          <label class="chk-row"><input type="checkbox"${f.isMemoryKey?' checked':''} onchange="fieldChange(${i},'isMemoryKey',this.checked)"> מפתח זיכרון</label>
+          <label class="chk-row"><input type="checkbox"${f.isScannable?' checked':''} onchange="fieldChange(${i},'isScannable',this.checked)"> ניתן לסריקה</label>
+        </div>
+      </div>`;
+    c.appendChild(div);
+  });
+}
+
+/* ═══════════════════════════════════════
+   FORMULAS
+═══════════════════════════════════════ */
+function addFormula(data){
+  formulas.push(data || {name:'',expression:'',targetFieldName:'',digits:1,_open:true});
+  renderAll();
+}
+function removeFormula(i){ formulas.splice(i,1); renderAll(); }
+function formulaChange(i,prop,val){ formulas[i][prop]=(prop==='digits'?parseInt(val)||1:val); }
+function toggleFormula(i){ formulas[i]._open=!formulas[i]._open; renderAll(); }
+
+function renderFormulasInto(containerId){
+  const c = document.getElementById(containerId); if(!c) return;
+  c.innerHTML = '';
+  if(!formulas.length){ c.innerHTML='<p style="color:#999;font-size:13px;text-align:center;padding:10px 0;">אין חישובים — לחץ "הוסף חישוב"</p>'; return; }
+  formulas.forEach((f,i)=>{
+    const div = document.createElement('div');
+    div.className = 'field-card formula-card';
+    div.innerHTML = `
+      <div class="field-header formula-header">
+        <span class="field-num">${i+1}</span>
+        <span class="field-title formula-title">${esc(f.name)||'<em style="color:#aaa">חישוב ללא שם</em>'}</span>
+        <span style="font-size:11px;color:#888;">→ ${esc(f.targetFieldName)||'?'}</span>
+        <button class="expand-btn" onclick="toggleFormula(${i})">${f._open?'▲ סגור':'▼ פתח'}</button>
+        <button class="del-btn" onclick="removeFormula(${i})" title="מחק חישוב">✕</button>
+      </div>
+      <div class="field-body${f._open?' open':''}">
+        <div class="row2">
+          <div>
+            <label class="lbl">שם החישוב</label>
+            <input type="text" value="${esc(f.name)}" placeholder="לדוגמה: חישוב ע.ע.ב"
+              oninput="formulaChange(${i},'name',this.value)">
+          </div>
+          <div>
+            <label class="lbl">שדה יעד (שם השדה שיקבל את הערך)</label>
+            <input type="text" value="${esc(f.targetFieldName)}" placeholder="ע.ע.ב / עומס מבחן"
+              oninput="formulaChange(${i},'targetFieldName',this.value)">
+          </div>
+        </div>
+        <label class="lbl">נוסחה — ביטוי ניתן לחישוב. ריק = שליטה בספרות בלבד (עבור ע.ע.ב / עומס מבחן)</label>
+        <input type="text" dir="ltr" style="text-align:left;font-family:monospace;" value="${esc(f.expression)}" placeholder="{מקדם}*{קוטר}*{קוטר}/1000"
+          oninput="formulaChange(${i},'expression',this.value)">
+        <div class="vars-bar" style="margin-top:6px;">
+          ${fields.filter(ff=>ff.name.trim()).map(ff=>`<span class="var-chip" onclick="insertFormulaVar(${i},'${esc(ff.name)}')">{${ff.name}}</span>`).join('')}
+        </div>
+        <label class="lbl">ספרות אחרי הנקודה (0-4)</label>
+        <select style="width:auto;" onchange="formulaChange(${i},'digits',this.value)">
+          ${[0,1,2,3,4].map(d=>`<option value="${d}"${d===f.digits?' selected':''}>${d}</option>`).join('')}
+        </select>
+      </div>`;
+    c.appendChild(div);
+  });
+}
+function insertFormulaVar(fi, name){
+  // finds the focused input or just appends
+  const inputs = document.querySelectorAll(`[oninput*="formulaChange(${fi},'expression'"]`);
+  const inp = inputs[0]; if(!inp) return;
+  const pos = inp.selectionStart;
+  const val = inp.value;
+  inp.value = val.slice(0,pos)+'{'+name+'}'+val.slice(inp.selectionEnd);
+  formulas[fi].expression = inp.value;
+  inp.selectionStart = inp.selectionEnd = pos+name.length+2;
+  inp.focus();
+}
+
+/* ═══════════════════════════════════════
+   EXPORT / IMPORT
+═══════════════════════════════════════ */
+function buildTemplate(){
+  return {
+    version: 1,
+    type: 'accessory_smart_template',
+    typeName: document.getElementById('typeName').value.trim(),
+    descriptionTemplate: document.getElementById('descriptionTemplate').value.trim(),
+    fields: fields.filter(f=>f.name.trim()).map(f=>({
+      name: f.name.trim(),
+      inputType: f.inputType,
+      options: f.options,
+      isRequired: f.isRequired,
+      isMemoryKey: f.isMemoryKey,
+      inDescription: f.inDescription,
+      isSeparateColumn: f.isSeparateColumn,
+      isForCalculation: f.isForCalculation,
+      isScannable: f.isScannable,
+      defaultValue: f.defaultValue||''
+    })),
+    formulas: formulas.filter(f=>f.name.trim()&&f.targetFieldName.trim()).map(f=>({
+      name: f.name.trim(),
+      expression: f.expression.trim(),
+      targetFieldName: f.targetFieldName.trim(),
+      digits: f.digits||1
+    }))
+  };
+}
+function validate(t){
+  if(!t.typeName) return 'יש להזין שם סוג אביזר.';
+  if(!t.fields||!t.fields.length) return 'יש להוסיף לפחות שדה אחד.';
+  if(!t.descriptionTemplate) return 'יש להגדיר תבנית תיאור.';
+  return null;
+}
+/* ═══════════════════════════════════════
+   Bundle management
+═══════════════════════════════════════ */
+function updateBundlePanel(){
+  const p = document.getElementById('bundle-panel');
+  if(!p) return;
+  if(templateBundle.length < 2){ p.style.display='none'; return; }
+  p.style.display = 'block';
+  const sel = document.getElementById('bundle-select');
+  sel.innerHTML = templateBundle.map((t,i)=>`<option value="${i}">${(t.typeName||'תבנית '+(i+1)).replace(/</g,'&lt;')}</option>`).join('');
+  sel.value = String(Math.max(0, bundleCurrentIdx));
+  document.getElementById('bundle-count').textContent = `(${templateBundle.length} תבניות)`;
+}
+function saveToBundleBeforeSwitch(){
+  if(templateBundle.length < 2 || bundleCurrentIdx < 0 || bundleCurrentIdx >= templateBundle.length) return;
+  templateBundle[bundleCurrentIdx] = buildTemplate();
+}
+function switchBundleTemplate(idx){
+  saveToBundleBeforeSwitch();
+  if(idx < 0 || idx >= templateBundle.length) return;
+  bundleCurrentIdx = idx;
+  document.getElementById('bundle-select').value = String(idx);
+  loadFromData(templateBundle[idx]);
+}
+
+function exportJson(){
+  saveToBundleBeforeSwitch();
+  const safe = s => String(s||'template').replace(/[^א-תa-zA-Z0-9_-]/g,'_');
+  if(templateBundle.length > 1){
+    const data = {exportVersion:1, exportType:'accessory_templates_bundle',
+      exportDate: new Date().toISOString().slice(0,10), templates: templateBundle};
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'accessory_templates_bundle.json';
+    a.click(); URL.revokeObjectURL(url);
+    showToast('ייצוא bundle עם '+templateBundle.length+' תבניות ✓');
+    return;
+  }
+  const t = buildTemplate();
+  const err = validate(t);
+  if(err){ showToast('⚠ '+err); return; }
+  const blob = new Blob([JSON.stringify(t, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'accessory_template_'+safe(t.typeName)+'.json';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('ייצוא: accessory_template_'+safe(t.typeName)+'.json ✓');
+}
+function loadFromData(obj){
+  document.getElementById('typeName').value = obj.typeName||'';
+  document.getElementById('descriptionTemplate').value = obj.descriptionTemplate||'';
+  fields = (obj.fields||[]).map(f=>({
+    name: f.name||'', inputType: f.inputType||'TEXT',
+    options: f.options||[], defaultValue: f.defaultValue||'',
+    isRequired: !!f.isRequired, isMemoryKey: !!f.isMemoryKey,
+    inDescription: f.inDescription!==false,
+    isSeparateColumn: !!f.isSeparateColumn,
+    isForCalculation: !!f.isForCalculation,
+    isScannable: !!f.isScannable,
+    _open: false
+  }));
+  formulas = (obj.formulas||[]).map(f=>({
+    name: f.name||'', expression: f.expression||'',
+    targetFieldName: f.targetFieldName||'', digits: f.digits||1, _open: false
+  }));
+  renderAll();
+}
+function handleFile(file){
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if(parsed.exportVersion && Array.isArray(parsed.templates) && parsed.templates.length>0){
+        templateBundle = parsed.templates.slice();
+        bundleCurrentIdx = 0;
+        loadFromData(templateBundle[0]);
+        updateBundlePanel();
+        showToast('נטענו '+templateBundle.length+' תבניות. עורכים: "'+templateBundle[0].typeName+'" ✓');
+      } else if(parsed.typeName){
+        templateBundle = []; bundleCurrentIdx = -1;
+        loadFromData(parsed);
+        updateBundlePanel();
+        showToast('תבנית "'+parsed.typeName+'" נטענה ✓');
+      } else {
+        showToast('⚠ פורמט לא מזוהה');
+      }
+    } catch(_){ showToast('⚠ שגיאה בפענוח JSON'); }
+  };
+  r.readAsText(file, 'UTF-8');
+  document.getElementById('importFile').value='';
+}
+function handleDrop(ev){
+  ev.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const file = ev.dataTransfer.files[0];
+  if(file) handleFile(file);
+}
+function clearAll(){
+  if(!confirm('לנקות הכל ולהתחיל מחדש?')) return;
+  document.getElementById('typeName').value='';
+  document.getElementById('descriptionTemplate').value='';
+  fields=[]; formulas=[];
+  templateBundle=[]; bundleCurrentIdx=-1;
+  updateBundlePanel();
+  renderAll();
+}
+
+/* ═══════════════════════════════════════
+   UTILS
+═══════════════════════════════════════ */
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
+function init(){ renderAll(); }
+window.addEventListener('load', init);
+
+// סנכרון textarea ראשי עם ה-all tab textarea
+document.getElementById('descriptionTemplate').addEventListener('input', ()=>renderAll());
+</script>
+</body>
+</html>
