@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,9 +46,30 @@ import androidx.compose.ui.unit.sp
 import android.content.Context
 import android.provider.MediaStore
 import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.platform.LocalContext
+import com.nasavi.liftinginspectorpro.data.AppTheme
+import com.nasavi.liftinginspectorpro.data.AppThemeState
 import com.nasavi.liftinginspectorpro.data.InspectorSettingsStorage
 import com.nasavi.liftinginspectorpro.data.ReportStorage
+import com.nasavi.liftinginspectorpro.data.themeBackgroundColors
+import com.nasavi.liftinginspectorpro.data.themeBorderColors
+import com.nasavi.liftinginspectorpro.data.themeButtonColors
 import com.nasavi.liftinginspectorpro.data.themedButtonBorder
 import com.nasavi.liftinginspectorpro.data.themedTitleBorder
 import java.io.File
@@ -76,7 +99,8 @@ fun HomeScreen(
     onRemoveSignature: () -> Unit = {},
     onImportTemplateSelected: (android.net.Uri) -> Unit = {},
     onRenewalClick: (() -> Unit)? = null,
-    onBackToMain: (() -> Unit)? = null
+    onBackToMain: (() -> Unit)? = null,
+    onGeneralSettingsSaved: (() -> Unit)? = null
 ) {
     val ctx = LocalContext.current
     val theme = com.nasavi.liftinginspectorpro.data.AppThemeState.current
@@ -87,6 +111,7 @@ fun HomeScreen(
     val buttonColor = theme.buttonColor
 
     var reportTextDialogOpen by remember { mutableStateOf(false) }
+    var generalSettingsOpen by remember { mutableStateOf(false) }
 
     fun exportAccessoryTemplatesToDownloads() {
         val prefs = ctx.getSharedPreferences("lifting_inspection_prefs", Context.MODE_PRIVATE)
@@ -311,6 +336,16 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
+                onClick = { generalSettingsOpen = true },
+                modifier = Modifier.fillMaxWidth().themedButtonBorder(),
+                colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
+            ) {
+                Text("הגדרות כלליות")
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
                 onClick = { reportTextDialogOpen = true },
                 modifier = Modifier.fillMaxWidth().themedButtonBorder(),
                 colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
@@ -426,6 +461,13 @@ fun HomeScreen(
         }
 
         Spacer(modifier = Modifier.height(8.dp))
+    }
+
+    if (generalSettingsOpen) {
+        GeneralSettingsDialog(
+            onDismiss = { generalSettingsOpen = false },
+            onSaved = { onGeneralSettingsSaved?.invoke() }
+        )
     }
 
     if (reportTextDialogOpen) {
@@ -602,5 +644,221 @@ private fun composeInspectorDetailsForHome(
     certificateNumber: String
 ): String {
     return listOf(firstName.trim(), lastName.trim(), certificateNumber.trim()).joinToString("|")
+}
+
+@Composable
+private fun GeneralSettingsDialog(onDismiss: () -> Unit, onSaved: () -> Unit = {}) {
+    val context = LocalContext.current
+    val initInspector = remember { InspectorSettingsStorage.getInspectorDetailsObject(context) }
+    var firstName by remember { mutableStateOf(initInspector.firstName) }
+    var lastName by remember { mutableStateOf(initInspector.lastName) }
+    var certNumber by remember { mutableStateOf(initInspector.certificateNumber) }
+    var stampPath by remember { mutableStateOf(InspectorSettingsStorage.getStampPath(context)) }
+    var signaturePath by remember { mutableStateOf(InspectorSettingsStorage.getSignaturePath(context)) }
+    var company by remember { mutableStateOf(InspectorSettingsStorage.getCompanyDetails(context)) }
+    var logoPath by remember { mutableStateOf(InspectorSettingsStorage.getLogoPath(context)) }
+    var nextAccessoriesNum by remember { mutableStateOf(InspectorSettingsStorage.getNextReportNumber(context)) }
+    var tab by remember { mutableStateOf(0) }
+    var tempTheme by remember { mutableStateOf(AppThemeState.current) }
+    var pickerCategory by remember { mutableStateOf("") }
+    var pickerOpen by remember { mutableStateOf(false) }
+    var pickerInitialColor by remember { mutableStateOf(Color.White) }
+
+    val stampPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        if (uri != null) stampPath = InspectorSettingsStorage.saveStampFromUri(context, uri)
+    }
+    val signaturePickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        if (uri != null) signaturePath = InspectorSettingsStorage.saveSignatureFromUri(context, uri)
+    }
+    val logoPickerLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+        if (uri != null) logoPath = InspectorSettingsStorage.saveLogoFromUri(context, uri)
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(dismissOnClickOutside = false, dismissOnBackPress = false, usePlatformDefaultWidth = false),
+        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+        title = { Text("הגדרות כלליות") },
+        text = {
+            Column {
+                ScrollableTabRow(selectedTabIndex = tab, edgePadding = 0.dp) {
+                    Tab(selected = tab == 0, onClick = { tab = 0 }) { Text("בודק פנים מפעלי", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
+                    Tab(selected = tab == 1, onClick = { tab = 1 }) { Text("חתימה/חותמת מפעל", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
+                    Tab(selected = tab == 2, onClick = { tab = 2 }) { Text("מספרי תסקיר", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
+                    Tab(selected = tab == 3, onClick = { tab = 3 }) { Text("צבעים", modifier = Modifier.padding(6.dp), fontSize = 11.sp) }
+                }
+                Column(
+                    modifier = Modifier
+                        .heightIn(max = 520.dp)
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    when (tab) {
+                        0 -> {
+                            OutlinedTextField(value = firstName, onValueChange = { firstName = it }, label = { Text("שם פרטי") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = lastName, onValueChange = { lastName = it }, label = { Text("שם משפחה") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedTextField(value = certNumber, onValueChange = { certNumber = it.filter { ch -> ch.isDigit() } }, label = { Text("מספר הסמכה / מספר בודק") }, modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+                        }
+                        1 -> {
+                            OutlinedTextField(value = company.companyName, onValueChange = { company = company.copy(companyName = it) }, label = { Text("שם המפעל") }, modifier = Modifier.fillMaxWidth())
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("לוגו:", fontWeight = FontWeight.Bold)
+                            Text(if (logoPath.isNotBlank()) "לוגו קיים" else "לא נבחר לוגו", fontSize = 12.sp)
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(onClick = { logoPickerLauncher.launch(arrayOf("image/*")) }, modifier = Modifier.weight(1f)) {
+                                    Text(if (logoPath.isNotBlank()) "החלף לוגו" else "בחר לוגו PNG/JPG")
+                                }
+                                if (logoPath.isNotBlank()) {
+                                    TextButton(onClick = { InspectorSettingsStorage.removeLogo(context); logoPath = "" }, modifier = Modifier.weight(1f)) { Text("הסר") }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("חותמת:", fontWeight = FontWeight.Bold)
+                            Text(if (stampPath.isNotBlank()) "חותמת קיימת" else "לא הוגדרה חותמת", fontSize = 12.sp)
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(onClick = { stampPickerLauncher.launch(arrayOf("image/png", "image/jpeg")) }, modifier = Modifier.weight(1f)) { Text("בחר חותמת") }
+                                if (stampPath.isNotBlank()) {
+                                    TextButton(onClick = { InspectorSettingsStorage.removeStamp(context); stampPath = "" }, modifier = Modifier.weight(1f)) { Text("הסר") }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("חתימה:", fontWeight = FontWeight.Bold)
+                            Text(if (signaturePath.isNotBlank()) "חתימה קיימת" else "לא הוגדרה חתימה", fontSize = 12.sp)
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(onClick = { signaturePickerLauncher.launch(arrayOf("image/png", "image/jpeg")) }, modifier = Modifier.weight(1f)) { Text("בחר חתימה") }
+                                if (signaturePath.isNotBlank()) {
+                                    TextButton(onClick = { InspectorSettingsStorage.removeSignature(context); signaturePath = "" }, modifier = Modifier.weight(1f)) { Text("הסר") }
+                                }
+                            }
+                        }
+                        2 -> {
+                            Text("מספר תסקיר הבא — אביזרי הרמה", fontWeight = FontWeight.Bold)
+                            OutlinedTextField(
+                                value = nextAccessoriesNum,
+                                onValueChange = { nextAccessoriesNum = it },
+                                label = { Text("מספר תסקיר (לדוגמה: R6175)") },
+                                modifier = Modifier.fillMaxWidth(),
+                                textStyle = TextStyle(textDirection = TextDirection.Ltr)
+                            )
+                        }
+                        3 -> {
+                            Text("צבעי ממשק האפליקציה", fontWeight = FontWeight.Bold)
+                            Text("לחץ על ריבוע הצבע או 'בחר' לפתיחת בורר הצבעים", fontSize = 11.sp, color = Color.Gray)
+                            Spacer(Modifier.height(4.dp))
+                            ColorPickerRow("רקע המסך", tempTheme.backgroundColor) { pickerCategory = "bg"; pickerInitialColor = tempTheme.backgroundColor; pickerOpen = true }
+                            ColorPickerRow("מסגרת/גבול", tempTheme.borderColor) { pickerCategory = "border"; pickerInitialColor = tempTheme.borderColor; pickerOpen = true }
+                            ColorPickerRow("כותרת מסך", tempTheme.titleColor) { pickerCategory = "title"; pickerInitialColor = tempTheme.titleColor; pickerOpen = true }
+                            ColorPickerRow("כפתורים", tempTheme.buttonColor) { pickerCategory = "button"; pickerInitialColor = tempTheme.buttonColor; pickerOpen = true }
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                            Text("מסגרת כפתורים", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            ColorPickerRow("גוון", tempTheme.buttonBorderColor) { pickerCategory = "btnBorderColor"; pickerInitialColor = tempTheme.buttonBorderColor; pickerOpen = true }
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text("עובי: ${tempTheme.buttonBorderWidth}dp", modifier = Modifier.width(80.dp), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Slider(value = tempTheme.buttonBorderWidth.toFloat(), onValueChange = { tempTheme = tempTheme.copy(buttonBorderWidth = it.toInt()) }, valueRange = 0f..8f, steps = 7, modifier = Modifier.weight(1f))
+                            }
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                            Text("מסגרת כותרת", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            ColorPickerRow("גוון", tempTheme.titleBorderColor) { pickerCategory = "titleBorderColor"; pickerInitialColor = tempTheme.titleBorderColor; pickerOpen = true }
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text("עובי: ${tempTheme.titleBorderWidth}dp", modifier = Modifier.width(80.dp), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                Slider(value = tempTheme.titleBorderWidth.toFloat(), onValueChange = { tempTheme = tempTheme.copy(titleBorderWidth = it.toInt()) }, valueRange = 0f..8f, steps = 7, modifier = Modifier.weight(1f))
+                            }
+                            if (pickerOpen) {
+                                ColorPickerDialog(
+                                    title = when (pickerCategory) {
+                                        "bg" -> "בחר צבע רקע"; "border" -> "בחר צבע מסגרת"
+                                        "title" -> "בחר צבע כותרת"; "button" -> "בחר צבע כפתורים"
+                                        "btnBorderColor" -> "גוון מסגרת כפתורים"; "titleBorderColor" -> "גוון מסגרת כותרת"
+                                        else -> "בחר צבע"
+                                    },
+                                    initialColor = pickerInitialColor,
+                                    presetColors = when (pickerCategory) { "bg" -> themeBackgroundColors; "button" -> themeButtonColors; else -> themeBorderColors },
+                                    onColorSelected = { color ->
+                                        tempTheme = when (pickerCategory) {
+                                            "bg" -> tempTheme.copy(backgroundColor = color); "border" -> tempTheme.copy(borderColor = color)
+                                            "title" -> tempTheme.copy(titleColor = color); "button" -> tempTheme.copy(buttonColor = color)
+                                            "btnBorderColor" -> tempTheme.copy(buttonBorderColor = color); "titleBorderColor" -> tempTheme.copy(titleBorderColor = color)
+                                            else -> tempTheme
+                                        }
+                                        pickerOpen = false
+                                    },
+                                    onDismiss = { pickerOpen = false }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                InspectorSettingsStorage.saveSettings(context, firstName, lastName, certNumber, nextAccessoriesNum.trim())
+                InspectorSettingsStorage.saveCompanyDetails(context, company)
+                AppThemeState.save(context, tempTheme)
+                onSaved()
+                onDismiss()
+            }) { Text("שמור") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("ביטול") }
+        }
+    )
+}
+
+@Composable
+private fun ColorPickerRow(label: String, color: Color, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(label, modifier = Modifier.width(80.dp), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        Box(modifier = Modifier.weight(1f).height(36.dp).background(color).border(1.dp, Color.Gray).clickable { onClick() })
+        OutlinedButton(onClick = onClick, modifier = Modifier.width(56.dp), contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)) {
+            Text("בחר", fontSize = 12.sp)
+        }
+    }
+}
+
+@Composable
+private fun ColorPickerDialog(title: String, initialColor: Color, presetColors: List<Color>, onColorSelected: (Color) -> Unit, onDismiss: () -> Unit) {
+    val initHsv = remember(initialColor.toArgb()) { FloatArray(3).also { android.graphics.Color.colorToHSV(initialColor.toArgb(), it) } }
+    var hue by remember { mutableStateOf(initHsv[0]) }
+    var sat by remember { mutableStateOf(initHsv[1]) }
+    var bri by remember { mutableStateOf(initHsv[2]) }
+    var selectedTab by remember { mutableStateOf(0) }
+    var pendingColor by remember { mutableStateOf(initialColor) }
+    val customColor = Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, sat, bri)))
+    val activeColor = if (selectedTab == 0) pendingColor else customColor
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                androidx.compose.material3.TabRow(selectedTabIndex = selectedTab) {
+                    androidx.compose.material3.Tab(selected = selectedTab == 0, onClick = { selectedTab = 0 }, text = { Text("רגיל", fontSize = 13.sp) })
+                    androidx.compose.material3.Tab(selected = selectedTab == 1, onClick = { selectedTab = 1 }, text = { Text("מותאם אישית", fontSize = 13.sp) })
+                }
+                if (selectedTab == 0) {
+                    androidx.compose.foundation.lazy.grid.LazyVerticalGrid(columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(5), modifier = Modifier.height(160.dp)) {
+                        items(presetColors.size) { i ->
+                            val c = presetColors[i]
+                            Box(modifier = Modifier.padding(4.dp).aspectRatio(1f).background(c).border(if (c == pendingColor) 3.dp else 1.dp, if (c == pendingColor) Color.Black else Color.Gray).clickable { pendingColor = c })
+                        }
+                    }
+                } else {
+                    Text("גוון (Hue)", fontSize = 12.sp); Slider(value = hue, onValueChange = { hue = it }, valueRange = 0f..360f)
+                    Text("רוויה (Saturation)", fontSize = 12.sp); Slider(value = sat, onValueChange = { sat = it }, valueRange = 0f..1f)
+                    Text("בהירות (Brightness)", fontSize = 12.sp); Slider(value = bri, onValueChange = { bri = it }, valueRange = 0f..1f)
+                }
+                Box(modifier = Modifier.fillMaxWidth().height(40.dp).background(activeColor).border(1.dp, Color.Gray))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onDismiss) { Text("ביטול") }
+                    TextButton(onClick = { onColorSelected(activeColor) }) { Text("בחר") }
+                }
+            }
+        }
+    }
 }
 

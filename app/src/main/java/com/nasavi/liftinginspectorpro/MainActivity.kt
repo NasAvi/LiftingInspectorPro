@@ -367,7 +367,13 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         onRenewalClick = { currentScreen = "renewal" },
-                        onBackToMain = { currentScreen = "home" }
+                        onBackToMain = null,
+                        onGeneralSettingsSaved = {
+                            inspectorDetails = InspectorSettingsStorage.getInspectorDetails(context)
+                            nextReportNumber = InspectorSettingsStorage.getNextReportNumber(context)
+                            inspectorStampPath = InspectorSettingsStorage.getStampPath(context)
+                            inspectorSignaturePath = InspectorSettingsStorage.getSignaturePath(context)
+                        }
                     )
 
                     "renewal" -> com.nasavi.liftinginspectorpro.ui.screens.RenewalScreen(
