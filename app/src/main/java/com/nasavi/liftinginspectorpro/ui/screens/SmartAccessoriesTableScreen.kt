@@ -102,7 +102,7 @@ private fun smartTemplateFromJsonText(text: String): SmartAccessoryTemplate? {
 // ────────────────────────────────────────────────────────────────────────────────
 
 private const val SEED_VERSION_KEY = "smart_acc_seed_v"
-private const val CURRENT_SEED_VERSION = 9  // הגדל כאשר defaultAccessoryTemplates משתנה
+private const val CURRENT_SEED_VERSION = 10  // הגדל כאשר defaultAccessoryTemplates משתנה
 
 // תת-סוגים של אביזרי קצה — מוצגים בתפריט משני בלבד, לא בדרופדאון הראשי
 private val END_ACCESSORY_CHILD_NAMES = listOf("סגיר אומגה", "התקן להרמת שוחות")
@@ -111,6 +111,8 @@ private val END_ACCESSORY_CHILD_NAMES = listOf("סגיר אומגה", "התקן 
 private val SEED_FORCE_REFRESH_V8 = setOf("סגיר אומגה")
 // תבניות שיוחלפו בכוח בעדכון לגרסה 9 (מענבי כבל — מקדם מוטמע באפשרויות "טקסט,מקדם")
 private val SEED_FORCE_REFRESH_V9 = setOf("מענבי כבל")
+// תבניות שיוחלפו בכוח בעדכון לגרסה 10 (רצועות הרמה — גוון/רוחב ללא טון, תבנית תיאור מעודכנת)
+private val SEED_FORCE_REFRESH_V10 = setOf("רצועות הרמה")
 
 private val smartDateFmt: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
@@ -160,13 +162,13 @@ private val defaultAccessoryTemplates: List<SmartAccessoryTemplate> = listOf(
     ),
     SmartAccessoryTemplate(
         typeName = "רצועות הרמה",
-        descriptionTemplate = "{סוג רצועה} {חומר גלם} באורך {אורך} מטר, {גוון / ע.ע.ב}",
+        descriptionTemplate = "{סוג רצועה} {גוון / ע.ע.ב} {חומר גלם}, באורך {אורך} מטר",
         fields = listOf(
             SmartAccessoryFieldDefinition("יצרן", SmartFieldInputType.LIST, listOf("ללא", "אחר"), isMemoryKey = true),
             SmartAccessoryFieldDefinition("דגם", SmartFieldInputType.LIST, listOf("ללא", "אחר"), isMemoryKey = true),
             SmartAccessoryFieldDefinition("סוג רצועה", SmartFieldInputType.LIST, listOf("רצועת הרמה שטוחה", "רצועת הרמה עגולה", "רצועת הרמה אינסופית", "אחר"), isRequired = true, inDescription = true),
-            SmartAccessoryFieldDefinition("רוחב / ע.ע.ב", SmartFieldInputType.LIST, listOf("30 - 1 טון", "60 - 2 טון", "90 - 3 טון", "120 - 4 טון", "150 - 5 טון", "180 - 6 טון", "210 - 8 טון", "240 - 10 טון", "אחר"), inDescription = true, isForCalculation = true),
-            SmartAccessoryFieldDefinition("גוון / ע.ע.ב", SmartFieldInputType.LIST, listOf("סגולה - 1 טון", "ירוקה - 2 טון", "צהובה - 3 טון", "אפורה - 4 טון", "אדומה - 5 טון", "חומה - 6 טון", "כחולה - 8 טון", "כתומה - 10 טון", "אחר"), inDescription = true, isForCalculation = true),
+            SmartAccessoryFieldDefinition("רוחב / ע.ע.ב", SmartFieldInputType.LIST, listOf("30", "60", "90", "120", "150", "180", "210", "240", "אחר"), inDescription = true, isForCalculation = true),
+            SmartAccessoryFieldDefinition("גוון / ע.ע.ב", SmartFieldInputType.LIST, listOf("סגולה", "ירוקה", "צהובה", "אפורה", "אדומה", "חומה", "כחולה", "כתומה", "אחר"), inDescription = true, isForCalculation = true),
             SmartAccessoryFieldDefinition("חומר גלם", SmartFieldInputType.LIST, listOf("מפוליאסטר", "פוליפרופילן", "ניילון", "אחר"), inDescription = true),
             SmartAccessoryFieldDefinition("אורך", SmartFieldInputType.DECIMAL, isRequired = true, inDescription = true),
             SmartAccessoryFieldDefinition("ע.ע.ב", SmartFieldInputType.READ_ONLY, isRequired = true, isSeparateColumn = true),
@@ -226,8 +228,9 @@ private fun seedDefaultTemplatesIfNeeded(prefs: android.content.SharedPreference
     val saved = loadSmartAccessoryTemplates(prefs)
     val savedNames = saved.map { it.typeName }.toSet()
     val forceRefresh = when {
-        storedVersion < 8 -> SEED_FORCE_REFRESH_V8 + SEED_FORCE_REFRESH_V9
-        storedVersion < 9 -> SEED_FORCE_REFRESH_V9
+        storedVersion < 8 -> SEED_FORCE_REFRESH_V8 + SEED_FORCE_REFRESH_V9 + SEED_FORCE_REFRESH_V10
+        storedVersion < 9 -> SEED_FORCE_REFRESH_V9 + SEED_FORCE_REFRESH_V10
+        storedVersion < 10 -> SEED_FORCE_REFRESH_V10
         else -> emptySet()
     }
     val toReplace = defaultAccessoryTemplates.filter { it.typeName !in savedNames || it.typeName in forceRefresh }
@@ -369,11 +372,31 @@ private fun cableWllText(diameter: Double, baseCoeff: Double, endFactor: Double,
     }
 }
 
-// חישוב ע.ע.ב לרצועות הרמה לפי גוון או רוחב (מחלץ "X טון" מהאפשרות הנבחרת)
+// טבלאות המרה לרצועות הרמה (גוון → ע.ע.ב, רוחב מ"מ → ע.ע.ב) לפי EN 1492-1
+private val strapColorToWll = mapOf(
+    "סגולה" to "1 טון", "ירוקה" to "2 טון", "צהובה" to "3 טון",
+    "אפורה" to "4 טון", "אדומה" to "5 טון", "חומה" to "6 טון",
+    "כחולה" to "8 טון", "כתומה" to "10 טון"
+)
+private val strapWidthToWll = mapOf(
+    "30" to "1 טון", "60" to "2 טון", "90" to "3 טון",
+    "120" to "4 טון", "150" to "5 טון", "180" to "6 טון",
+    "210" to "8 טון", "240" to "10 טון"
+)
+
+// חישוב ע.ע.ב לרצועות הרמה לפי גוון או רוחב
 private fun strapWllText(colorField: String, widthField: String): String? {
-    val source = colorField.ifBlank { widthField }
-    if (source.isBlank() || source == "ללא" || source == "אחר") return null
-    return Regex("(\\d+(?:[.,]\\d+)?\\s*טון)").find(source)?.value
+    if (colorField.isNotBlank() && colorField != "אחר") {
+        strapColorToWll[colorField]?.let { return it }
+        // תמיכה בפורמט ישן "צהובה - 3 טון"
+        Regex("(\\d+(?:[.,]\\d+)?\\s*טון)").find(colorField)?.value?.let { return it }
+    }
+    if (widthField.isNotBlank() && widthField != "אחר") {
+        strapWidthToWll[widthField]?.let { return it }
+        // תמיכה בפורמט ישן "90 - 3 טון"
+        Regex("(\\d+(?:[.,]\\d+)?\\s*טון)").find(widthField)?.value?.let { return it }
+    }
+    return null
 }
 
 // מחזיר ע.ע.ב מחושב עבור תבניות מובנות, או null אם אין חישוב מובנה.
