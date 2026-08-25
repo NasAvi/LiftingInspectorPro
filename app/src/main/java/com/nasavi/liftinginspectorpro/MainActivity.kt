@@ -400,7 +400,15 @@ class MainActivity : ComponentActivity() {
                                         inspectionPlaceType = "",
                                         defects = emptyList(),
                                         html = "",
-                                        isLockedForNewAccessories = false
+                                        isLockedForNewAccessories = false,
+                                        chainIndex = if (source.chainIndex >= 5) 1 else source.chainIndex + 1,
+                                        previousReportNumber = source.reportNumber,
+                                        previousInspectionDate = source.inspectionDate,
+                                        previousInspectorName = listOf(source.inspectorFirstName, source.inspectorLastName)
+                                            .filter { it.isNotBlank() }.joinToString(" "),
+                                        externalReportNumber = "",
+                                        externalInspectorName = "",
+                                        externalInspectionDate = ""
                                     )
                                     withContext(Dispatchers.IO) {
                                         ReportStorage.saveWorkingReport(context, renewed)

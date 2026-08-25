@@ -7,6 +7,7 @@ import android.util.Base64
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import java.io.ByteArrayOutputStream
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -920,6 +921,8 @@ fun InspectionFormScreen(
 
     val availableSites = remember { InspectorSettingsStorage.getSites(context) }
     var selectedSiteId by remember(screenKey) { mutableStateOf(editingReport?.site ?: "") }
+
+    val chainInfo = rememberChainInfoState(editingReport, screenKey)
 
     var inspectionDateDialogOpen by remember { mutableStateOf(false) }
     var defectFixUntilDialogOpen by remember { mutableStateOf(false) }
@@ -1991,6 +1994,8 @@ fun InspectionFormScreen(
             onSiteSelected = { selectedSiteId = it }
         )
 
+        ChainStatusSection(chainInfo = chainInfo)
+
         AccessoryClientMemoryField(
             value = owner,
             clientMemoryStore = clientMemoryStore,
@@ -2111,6 +2116,7 @@ fun InspectionFormScreen(
                         reportDefects = reportDefects.toList(),
                         reportNotes = reportNotes.toList(),
                         site = selectedSiteId,
+                        chainInfo = chainInfo.snapshot(),
                         html = "",
                         isLockedForNewAccessories = isLockedForNewAccessories
                     )
@@ -3755,7 +3761,8 @@ fun InspectionFormScreen(
                     reportNotes = reportNotes,
                     html = html,
                     isLockedForNewAccessories = isLockedForNewAccessories,
-                    site = selectedSiteId
+                    site = selectedSiteId,
+                    chainInfo = chainInfo.snapshot()
                 )
 
                 val noteTexts = reportNotes.map { it.text }
@@ -3890,6 +3897,7 @@ fun InspectionFormScreen(
                         val snapshotDefects = reportDefects.toList()
                         val snapshotNotes = reportNotes.toList()
                         val snapshotSiteId = selectedSiteId
+                        val snapshotChainInfo = chainInfo.snapshot()
                         val isEditing = editingReport != null
                         scope.launch {
                         try {
@@ -3918,7 +3926,8 @@ fun InspectionFormScreen(
                                 reportNotes = snapshotNotes,
                                 html = "",
                                 isLockedForNewAccessories = true,
-                                site = snapshotSiteId
+                                site = snapshotSiteId,
+                                chainInfo = snapshotChainInfo
                             )
                             saveAccessoryClientIfNeeded(
                                 clientMemoryStore = clientMemoryStore,
@@ -5129,7 +5138,8 @@ private fun buildWorkingReportForStorage(
     reportNotes: List<ReportNoteRow>,
     html: String,
     isLockedForNewAccessories: Boolean,
-    site: String = ""
+    site: String = "",
+    chainInfo: ChainInfoSnapshot = ChainInfoSnapshot()
 ): ReportStorage.WorkingReport {
     return ReportStorage.WorkingReport(
         reportNumber = runningNumber,
@@ -5149,6 +5159,13 @@ private fun buildWorkingReportForStorage(
         fixedNote = fixedNote,
         generalNote = generalNote,
         site = site,
+        chainIndex = chainInfo.chainIndex,
+        previousReportNumber = chainInfo.previousReportNumber,
+        previousInspectionDate = chainInfo.previousInspectionDate,
+        previousInspectorName = chainInfo.previousInspectorName,
+        externalReportNumber = chainInfo.externalReportNumber,
+        externalInspectorName = chainInfo.externalInspectorName,
+        externalInspectionDate = chainInfo.externalInspectionDate,
         accessories = reportAccessories.map {
             ReportStorage.StoredAccessoryRow(
                 description = it.description,
@@ -5466,6 +5483,103 @@ private fun FullReportScreen(
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 2
             )
+        }
+    }
+}
+
+/**
+ * מעקב שרשרת בדיקות: 5 בדיקות פנים-מפעליות רצופות, ואז בדיקה ע"י בודק מוסמך חיצוני שמאפסת את המחזור.
+ * מרוכז במחלקה אחת כדי לצמצם את מספר השורות בפונקציה הראשית (מגבלת bytecode של 64KB לפונקציה).
+ */
+private class ChainInfoState(
+    val chainIndex: Int,
+    val previousReportNumber: String,
+    val previousInspectionDate: String,
+    val previousInspectorName: String,
+    initialExternalReportNumber: String,
+    initialExternalInspectorName: String,
+    initialExternalInspectionDate: String
+) {
+    var externalReportNumber by mutableStateOf(initialExternalReportNumber)
+    var externalInspectorName by mutableStateOf(initialExternalInspectorName)
+    var externalInspectionDate by mutableStateOf(initialExternalInspectionDate)
+}
+
+private data class ChainInfoSnapshot(
+    val chainIndex: Int = 1,
+    val previousReportNumber: String = "",
+    val previousInspectionDate: String = "",
+    val previousInspectorName: String = "",
+    val externalReportNumber: String = "",
+    val externalInspectorName: String = "",
+    val externalInspectionDate: String = ""
+)
+
+private fun ChainInfoState.snapshot() = ChainInfoSnapshot(
+    chainIndex, previousReportNumber, previousInspectionDate, previousInspectorName,
+    externalReportNumber, externalInspectorName, externalInspectionDate
+)
+
+@Composable
+private fun rememberChainInfoState(editingReport: ReportStorage.WorkingReport?, screenKey: Any?): ChainInfoState {
+    return remember(screenKey) {
+        ChainInfoState(
+            chainIndex = editingReport?.chainIndex ?: 1,
+            previousReportNumber = editingReport?.previousReportNumber ?: "",
+            previousInspectionDate = editingReport?.previousInspectionDate ?: "",
+            previousInspectorName = editingReport?.previousInspectorName ?: "",
+            initialExternalReportNumber = editingReport?.externalReportNumber ?: "",
+            initialExternalInspectorName = editingReport?.externalInspectorName ?: "",
+            initialExternalInspectionDate = editingReport?.externalInspectionDate ?: ""
+        )
+    }
+}
+
+@Composable
+private fun ChainStatusSection(chainInfo: ChainInfoState) {
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            "בדיקה מספר ${chainInfo.chainIndex} מתוך 5 בשרשרת הבדיקות הפנים-מפעליות",
+            fontSize = 13.sp,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+        )
+        if (chainInfo.chainIndex >= 5) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Color(0xFFFFF3E0),
+                        androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+                    )
+                    .border(1.dp, Color(0xFFE65100), androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    "בדיקה זו היא הבדיקה ה-5 בשרשרת — נדרש בודק מוסמך חיצוני בבדיקה הבאה",
+                    fontSize = 12.sp,
+                    color = Color(0xFFE65100),
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
+                OutlinedTextField(
+                    value = chainInfo.externalReportNumber,
+                    onValueChange = { chainInfo.externalReportNumber = it },
+                    label = { Text("מספר תסקיר בודק חיצוני") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = chainInfo.externalInspectorName,
+                    onValueChange = { chainInfo.externalInspectorName = it },
+                    label = { Text("שם הבודק החיצוני") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = chainInfo.externalInspectionDate,
+                    onValueChange = { chainInfo.externalInspectionDate = it },
+                    label = { Text("תאריך בדיקה חיצונית") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }

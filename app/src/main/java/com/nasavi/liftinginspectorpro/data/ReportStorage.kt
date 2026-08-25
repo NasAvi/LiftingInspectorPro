@@ -72,7 +72,15 @@ object ReportStorage {
         // קוד מלא 12:
         // true = כבר הופקה לפחות גרסת PDF אחת, ולכן לא מוסיפים אביזרים חדשים לתסקיר זה.
         val isLockedForNewAccessories: Boolean = false,
-        val site: String = ""
+        val site: String = "",
+        // מעקב שרשרת בדיקות: 5 בדיקות פנים-מפעליות רצופות, ואז בדיקה ע"י בודק מוסמך חיצוני שמאפסת את המחזור.
+        val chainIndex: Int = 1,
+        val previousReportNumber: String = "",
+        val previousInspectionDate: String = "",
+        val previousInspectorName: String = "",
+        val externalReportNumber: String = "",
+        val externalInspectorName: String = "",
+        val externalInspectionDate: String = ""
     )
 
     /**
@@ -415,6 +423,13 @@ object ReportStorage {
         obj.put("htmlFileName", workingHtmlFileName)
         obj.put("isLockedForNewAccessories", report.isLockedForNewAccessories)
         obj.put("site", report.site)
+        obj.put("chainIndex", report.chainIndex)
+        obj.put("previousReportNumber", report.previousReportNumber)
+        obj.put("previousInspectionDate", report.previousInspectionDate)
+        obj.put("previousInspectorName", report.previousInspectorName)
+        obj.put("externalReportNumber", report.externalReportNumber)
+        obj.put("externalInspectorName", report.externalInspectorName)
+        obj.put("externalInspectionDate", report.externalInspectionDate)
 
         val accessoriesArray = JSONArray()
         report.accessories.forEach {
@@ -509,7 +524,14 @@ object ReportStorage {
             notes = notes,
             html = "",  // לא טוענים HTML מקובץ בעת loadWorkingReports — מונע OOM מ-25+ קבצי 2–3MB
             isLockedForNewAccessories = obj.optBoolean("isLockedForNewAccessories", false),
-            site = obj.optString("site", "")
+            site = obj.optString("site", ""),
+            chainIndex = obj.optInt("chainIndex", 1),
+            previousReportNumber = obj.optString("previousReportNumber", ""),
+            previousInspectionDate = obj.optString("previousInspectionDate", ""),
+            previousInspectorName = obj.optString("previousInspectorName", ""),
+            externalReportNumber = obj.optString("externalReportNumber", ""),
+            externalInspectorName = obj.optString("externalInspectorName", ""),
+            externalInspectionDate = obj.optString("externalInspectionDate", "")
         )
     }
 
