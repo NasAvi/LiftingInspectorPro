@@ -16,13 +16,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nasavi.liftinginspectorpro.SavedInspection
-import com.nasavi.liftinginspectorpro.data.ClientMemoryStore
+import com.nasavi.liftinginspectorpro.data.InspectorSettingsStorage
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -41,13 +40,12 @@ fun RenewalScreen(
     onBack: () -> Unit,
     excludedReportNumbers: Set<String> = emptySet(),
     onStartNewRenewalSession: () -> Unit = {},
-    customerQuery: String = "",
-    onCustomerQueryChange: (String) -> Unit = {},
+    sites: List<InspectorSettingsStorage.Site> = emptyList(),
+    selectedSiteId: String = "",
+    onSelectedSiteIdChange: (String) -> Unit = {},
     monthsText: String = "",
     onMonthsTextChange: (String) -> Unit = {}
 ) {
-    val ctx = LocalContext.current
-    val clientStore = remember { ClientMemoryStore(ctx) }
     val today = remember { LocalDate.now() }
     val renewalColor = com.nasavi.liftinginspectorpro.data.AppThemeState.current.buttonColor
     val titleColor = com.nasavi.liftinginspectorpro.data.AppThemeState.current.titleColor
@@ -69,20 +67,17 @@ fun RenewalScreen(
         else allReports.firstOrNull { it.reportNumber == selectedReportNumber }
     }
 
-    // ── מקטע ב: לפי לקוח ──
-    var clientDropdownOpen by remember { mutableStateOf(false) }
-    val clientSuggestions by remember(customerQuery) {
-        derivedStateOf { clientStore.searchClients(customerQuery, 8) }
-    }
+    // ── מקטע ב: לפי אתר ──
+    var siteDropdownOpen by remember { mutableStateOf(false) }
+    val selectedSite = remember(selectedSiteId, sites) { sites.firstOrNull { it.id == selectedSiteId } }
 
-    // רשימה מלאה (לפני גריעת מחודשים בסשן הנוכחי)
-    val allFilteredCustomerReports = remember(customerQuery, monthsText, allReports) {
+    // רשימה מלאה לפי אתר (לפני גריעת מחודשים בסשן הנוכחי)
+    val allFilteredSiteReports = remember(selectedSiteId, monthsText, allReports) {
         val months = monthsText.trim().toIntOrNull() ?: return@remember emptyList<SavedInspection>()
+        if (selectedSiteId.isBlank()) return@remember emptyList()
         val maxDate = today.plusMonths(months.toLong())
-        val normQuery = customerQuery.trim().lowercase()
-        if (normQuery.length < 2) return@remember emptyList()
         allReports
-            .filter { r -> r.client.trim().lowercase().startsWith(normQuery) && r.nextInspectionDate.isNotBlank() }
+            .filter { r -> r.site == selectedSiteId && r.nextInspectionDate.isNotBlank() }
             .mapNotNull { r ->
                 val nd = parseDateOrNull(r.nextInspectionDate) ?: return@mapNotNull null
                 if (!nd.isAfter(maxDate)) r to nd else null
@@ -92,12 +87,12 @@ fun RenewalScreen(
     }
 
     // רשימה גלויה — ללא מחודשים
-    val visibleCustomerReports = remember(allFilteredCustomerReports, excludedReportNumbers) {
-        allFilteredCustomerReports.filter { it.reportNumber !in excludedReportNumbers }
+    val visibleSiteReports = remember(allFilteredSiteReports, excludedReportNumbers) {
+        allFilteredSiteReports.filter { it.reportNumber !in excludedReportNumbers }
     }
 
-    val allRenewedForFilter = allFilteredCustomerReports.isNotEmpty() &&
-            visibleCustomerReports.isEmpty() &&
+    val allRenewedForFilter = allFilteredSiteReports.isNotEmpty() &&
+            visibleSiteReports.isEmpty() &&
             excludedReportNumbers.isNotEmpty()
 
     Column(
@@ -230,145 +225,136 @@ fun RenewalScreen(
             }
 
             // ════════════════════════════════
-            // מקטע ב — חידוש ללקוח / מפעל
+            // מקטע ב — חידוש לפי אתר
             // ════════════════════════════════
-            SectionCard(title = "חידוש לפי לקוח / מפעל", color = titleColor) {
+            SectionCard(title = "חידוש לפי אתר", color = titleColor) {
 
-                Box {
+                if (sites.isEmpty()) {
+                    Text("לא הוגדרו אתרים — הגדר אתרים בהגדרות כלליות ← אתרים", fontSize = 13.sp, color = Color.Gray)
+                } else {
+                    ExposedDropdownMenuBox(
+                        expanded = siteDropdownOpen,
+                        onExpandedChange = { siteDropdownOpen = it }
+                    ) {
+                        OutlinedTextField(
+                            value = selectedSite?.name ?: "בחר אתר",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("אתר") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = siteDropdownOpen) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = siteDropdownOpen,
+                            onDismissRequest = { siteDropdownOpen = false }
+                        ) {
+                            sites.forEach { site ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Column {
+                                            Text(site.name, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                                            if (site.address.isNotBlank()) Text(site.address, fontSize = 12.sp, color = Color.Gray)
+                                        }
+                                    },
+                                    onClick = {
+                                        onSelectedSiteIdChange(site.id)
+                                        siteDropdownOpen = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     OutlinedTextField(
-                        value = customerQuery,
-                        onValueChange = {
-                            onCustomerQueryChange(it)
-                            clientDropdownOpen = it.length >= 2
-                        },
-                        label = { Text("שם לקוח / מפעל") },
-                        placeholder = { Text("הקלד לפחות 2 אותיות") },
+                        value = monthsText,
+                        onValueChange = { onMonthsTextChange(it.filter { ch -> ch.isDigit() }.take(2)) },
+                        label = { Text("הצג תסקירים שתוקפם פג בעוד כמה חודשים") },
+                        placeholder = { Text("לדוגמה: 2") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
-                    DropdownMenu(
-                        expanded = clientDropdownOpen && clientSuggestions.isNotEmpty(),
-                        onDismissRequest = { clientDropdownOpen = false },
-                        modifier = Modifier.fillMaxWidth(0.9f)
-                    ) {
-                        clientSuggestions.forEach { client ->
-                            DropdownMenuItem(
-                                text = { Text(client.name) },
-                                onClick = {
-                                    onCustomerQueryChange(client.name)
-                                    clientDropdownOpen = false
-                                }
-                            )
-                        }
-                    }
-                }
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedTextField(
-                    value = monthsText,
-                    onValueChange = { onMonthsTextChange(it.filter { ch -> ch.isDigit() }.take(2)) },
-                    label = { Text("הצג תסקירים שתוקפם פג בעוד כמה חודשים") },
-                    placeholder = { Text("לדוגמה: 2") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-
-                val months = monthsText.trim().toIntOrNull()
-                when {
-                    customerQuery.trim().length < 2 ->
-                        Text("הקלד לפחות 2 אותיות לחיפוש לקוח", fontSize = 12.sp, color = Color.Gray)
-                    months == null ->
-                        Text("הכנס מספר חודשים", fontSize = 12.sp, color = Color.Gray)
-                    allRenewedForFilter -> {
-                        // ── הודעת סיום ──
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .border(2.dp, Color(0xFF2E7D32), RoundedCornerShape(10.dp))
-                                .background(Color(0xFFE8F5E9), RoundedCornerShape(10.dp))
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                "✓ משימת חידוש התסקירים הושלמה!",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                color = Color(0xFF1B5E20)
-                            )
-                            Text(
-                                "כל ${allFilteredCustomerReports.size} תסקירי ${customerQuery.trim()} חודשו בהצלחה",
-                                fontSize = 13.sp,
-                                color = Color(0xFF2E7D32)
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Button(
-                                onClick = onBack,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = renewalColor)
-                            ) { Text("חזור לתפריט אביזרים", fontWeight = FontWeight.Bold) }
-                            OutlinedButton(
-                                onClick = {
-                                    onCustomerQueryChange("")
-                                    onMonthsTextChange("")
-                                    onStartNewRenewalSession()
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            ) { Text("חידוש תסקירים נוסף") }
-                        }
-                    }
-                    visibleCustomerReports.isEmpty() ->
-                        Text("אין תסקירים שתוקפם פג בעוד $months חודשים ללקוח זה", fontSize = 13.sp, color = Color.Gray)
-                    else -> {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text("נמצאו ${visibleCustomerReports.size} תסקירים לחידוש:", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
-                        visibleCustomerReports.forEach { r ->
-                            val nd = parseDateOrNull(r.nextInspectionDate)
-                            val daysLeft = nd?.let { today.until(it).days }
-                            val expired = nd != null && nd.isBefore(today)
-                            Row(
+                    val months = monthsText.trim().toIntOrNull()
+                    when {
+                        selectedSiteId.isBlank() ->
+                            Text("בחר אתר לחיפוש", fontSize = 12.sp, color = Color.Gray)
+                        months == null ->
+                            Text("הכנס מספר חודשים", fontSize = 12.sp, color = Color.Gray)
+                        allRenewedForFilter -> {
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
-                                    .border(1.dp, if (expired) Color(0xFFC62828) else Color(0xFF1565C0), RoundedCornerShape(8.dp))
-                                    .padding(10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    .border(2.dp, Color(0xFF2E7D32), RoundedCornerShape(10.dp))
+                                    .background(Color(0xFFE8F5E9), RoundedCornerShape(10.dp))
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(r.reportNumber, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                    Text(r.client, fontSize = 12.sp, color = Color.DarkGray)
-                                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                        Text("בדיקה: ${r.date}", fontSize = 11.sp, color = Color.Gray)
-                                        if (r.nextInspectionDate.isNotBlank()) {
-                                            Text(
-                                                "תוקף: ${r.nextInspectionDate}${if (expired) " ✗" else ""}",
-                                                fontSize = 11.sp,
-                                                color = if (expired) Color(0xFFC62828) else Color(0xFF2E7D32)
-                                            )
-                                        }
-                                    }
-                                    if (expired) Text("פג תוקף", fontSize = 11.sp, color = Color(0xFFC62828), fontWeight = FontWeight.Bold)
-                                    else if (daysLeft != null) Text("פג בעוד $daysLeft ימים", fontSize = 11.sp, color = Color(0xFFE65100))
+                                Text("✓ משימת חידוש התסקירים הושלמה!", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF1B5E20))
+                                Text("כל ${allFilteredSiteReports.size} תסקירי ${selectedSite?.name ?: ""} חודשו בהצלחה", fontSize = 13.sp, color = Color(0xFF2E7D32))
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Button(onClick = onBack, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = renewalColor)) {
+                                    Text("חזור לתפריט אביזרים", fontWeight = FontWeight.Bold)
                                 }
-                                Button(
-                                    onClick = {
-                                        if (renewingNumber == null) {
-                                            renewingNumber = r.reportNumber
-                                            onRenewReport(r.reportNumber)
-                                        }
-                                    },
-                                    enabled = renewingNumber == null,
-                                    modifier = Modifier.themedButtonBorder(),
-                                    colors = ButtonDefaults.buttonColors(containerColor = renewalColor),
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                OutlinedButton(onClick = { onSelectedSiteIdChange(""); onMonthsTextChange(""); onStartNewRenewalSession() }, modifier = Modifier.fillMaxWidth()) {
+                                    Text("חידוש תסקירים נוסף")
+                                }
+                            }
+                        }
+                        visibleSiteReports.isEmpty() ->
+                            Text("אין תסקירים שתוקפם פג בעוד $months חודשים באתר זה", fontSize = 13.sp, color = Color.Gray)
+                        else -> {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("נמצאו ${visibleSiteReports.size} תסקירים לחידוש:", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                            visibleSiteReports.forEach { r ->
+                                val nd = parseDateOrNull(r.nextInspectionDate)
+                                val daysLeft = nd?.let { today.until(it).days }
+                                val expired = nd != null && nd.isBefore(today)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                        .border(1.dp, if (expired) Color(0xFFC62828) else Color(0xFF1565C0), RoundedCornerShape(8.dp))
+                                        .padding(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    if (renewingNumber == r.reportNumber) {
-                                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                                    } else {
-                                        Text("חדש")
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(r.reportNumber, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                        Text(r.client, fontSize = 12.sp, color = Color.DarkGray)
+                                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            Text("בדיקה: ${r.date}", fontSize = 11.sp, color = Color.Gray)
+                                            if (r.nextInspectionDate.isNotBlank()) {
+                                                Text(
+                                                    "תוקף: ${r.nextInspectionDate}${if (expired) " ✗" else ""}",
+                                                    fontSize = 11.sp,
+                                                    color = if (expired) Color(0xFFC62828) else Color(0xFF2E7D32)
+                                                )
+                                            }
+                                        }
+                                        if (expired) Text("פג תוקף", fontSize = 11.sp, color = Color(0xFFC62828), fontWeight = FontWeight.Bold)
+                                        else if (daysLeft != null) Text("פג בעוד $daysLeft ימים", fontSize = 11.sp, color = Color(0xFFE65100))
+                                    }
+                                    Button(
+                                        onClick = {
+                                            if (renewingNumber == null) {
+                                                renewingNumber = r.reportNumber
+                                                onRenewReport(r.reportNumber)
+                                            }
+                                        },
+                                        enabled = renewingNumber == null,
+                                        modifier = Modifier.themedButtonBorder(),
+                                        colors = ButtonDefaults.buttonColors(containerColor = renewalColor),
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                                    ) {
+                                        if (renewingNumber == r.reportNumber) {
+                                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                                        } else {
+                                            Text("חדש")
+                                        }
                                     }
                                 }
                             }

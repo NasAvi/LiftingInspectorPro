@@ -54,7 +54,8 @@ data class SavedInspection(
     val date: String,
     val client: String,
     val summary: String,
-    val nextInspectionDate: String = ""
+    val nextInspectionDate: String = "",
+    val site: String = ""
 )
 
 class MainActivity : ComponentActivity() {
@@ -257,8 +258,8 @@ class MainActivity : ComponentActivity() {
 
                 // מעקב חידוש תסקירים — תסקירים שחודשו בסשן הנוכחי (לגריעה מהרשימה)
                 var accessoryRenewalExcluded by remember { mutableStateOf(setOf<String>()) }
-                // שדות סינון לפי לקוח — מורמים כאן כדי לשרוד ניווט לטופס ובחזרה
-                var renewalCustomerQuery by remember { mutableStateOf("") }
+                // שדות סינון לפי אתר — מורמים כאן כדי לשרוד ניווט לטופס ובחזרה
+                var renewalSelectedSiteId by remember { mutableStateOf("") }
                 var renewalMonthsText by remember { mutableStateOf("") }
                 // האם לחזור למסך חידוש אחרי שמירת הטופס
                 var returnToRenewalAfterForm by remember { mutableStateOf(false) }
@@ -379,8 +380,9 @@ class MainActivity : ComponentActivity() {
                     "renewal" -> com.nasavi.liftinginspectorpro.ui.screens.RenewalScreen(
                         allReports = savedReports,
                         excludedReportNumbers = accessoryRenewalExcluded,
-                        customerQuery = renewalCustomerQuery,
-                        onCustomerQueryChange = { renewalCustomerQuery = it },
+                        sites = com.nasavi.liftinginspectorpro.data.InspectorSettingsStorage.getSites(context),
+                        selectedSiteId = renewalSelectedSiteId,
+                        onSelectedSiteIdChange = { renewalSelectedSiteId = it },
                         monthsText = renewalMonthsText,
                         onMonthsTextChange = { renewalMonthsText = it },
                         onRenewReport = { sourceNumber ->
@@ -415,13 +417,13 @@ class MainActivity : ComponentActivity() {
                         },
                         onBack = {
                             accessoryRenewalExcluded = emptySet()
-                            renewalCustomerQuery = ""
+                            renewalSelectedSiteId = ""
                             renewalMonthsText = ""
                             currentScreen = "home"
                         },
                         onStartNewRenewalSession = {
                             accessoryRenewalExcluded = emptySet()
-                            renewalCustomerQuery = ""
+                            renewalSelectedSiteId = ""
                             renewalMonthsText = ""
                         }
                     )
@@ -560,6 +562,7 @@ private fun loadSavedReportsForCards(context: android.content.Context): List<Sav
             date = stored.inspectionDate,
             client = stored.owner,
             nextInspectionDate = stored.nextInspectionDate,
+            site = stored.site,
             summary = if (stored.isLockedForNewAccessories) {
                 "תסקיר הופק ל-PDF | נעול להוספת אביזרים | אביזרים: ${stored.accessories.size}"
             } else {

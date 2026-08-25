@@ -901,9 +901,11 @@ fun InspectionFormScreen(
     var runningNumber by remember(screenKey) { mutableStateOf(editingReport?.reportNumber ?: initialRunningNumber) }
     var inspectionDate by remember(screenKey) { mutableStateOf(editingReport?.inspectionDate ?: "") }
     var nextInspectionDate by remember(screenKey) { mutableStateOf(editingReport?.nextInspectionDate ?: "") }
-    var owner by remember(screenKey) { mutableStateOf(editingReport?.owner ?: "") }
-    var address by remember(screenKey) { mutableStateOf(editingReport?.address ?: "") }
-    var phone by remember(screenKey) { mutableStateOf(editingReport?.phone ?: "") }
+    // בבודק פנים מפעלי הלקוח הוא תמיד החברה עצמה — ממלאים אוטומטית מפרטי החברה בהגדרות בתסקיר חדש
+    val companyDetailsForFill = remember { InspectorSettingsStorage.getCompanyDetails(context) }
+    var owner by remember(screenKey) { mutableStateOf(editingReport?.owner ?: companyDetailsForFill.companyName) }
+    var address by remember(screenKey) { mutableStateOf(editingReport?.address ?: companyDetailsForFill.address) }
+    var phone by remember(screenKey) { mutableStateOf(editingReport?.phone ?: companyDetailsForFill.phone) }
     var contactPerson by remember(screenKey) { mutableStateOf(editingReport?.contactPerson ?: "") }
     var saveClientToMemory by remember(screenKey) { mutableStateOf(true) }
     var saveClientAddressToMemory by remember(screenKey) { mutableStateOf(true) }
@@ -915,6 +917,9 @@ fun InspectionFormScreen(
 
     val inspectionPlaceOptions = listOf("באתר בניה", "במפעל", "במחסן לוגיסטי")
     var inspectionPlaceDialogOpen by remember { mutableStateOf(false) }
+
+    val availableSites = remember { InspectorSettingsStorage.getSites(context) }
+    var selectedSiteId by remember(screenKey) { mutableStateOf(editingReport?.site ?: "") }
 
     var inspectionDateDialogOpen by remember { mutableStateOf(false) }
     var defectFixUntilDialogOpen by remember { mutableStateOf(false) }
@@ -1980,6 +1985,12 @@ fun InspectionFormScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
+        SiteSelector(
+            sites = availableSites,
+            selectedSiteId = selectedSiteId,
+            onSiteSelected = { selectedSiteId = it }
+        )
+
         AccessoryClientMemoryField(
             value = owner,
             clientMemoryStore = clientMemoryStore,
@@ -2099,6 +2110,7 @@ fun InspectionFormScreen(
                         reportAccessories = reportAccessories.toList(),
                         reportDefects = reportDefects.toList(),
                         reportNotes = reportNotes.toList(),
+                        site = selectedSiteId,
                         html = "",
                         isLockedForNewAccessories = isLockedForNewAccessories
                     )
@@ -3742,7 +3754,8 @@ fun InspectionFormScreen(
                     reportDefects = reportDefects,
                     reportNotes = reportNotes,
                     html = html,
-                    isLockedForNewAccessories = isLockedForNewAccessories
+                    isLockedForNewAccessories = isLockedForNewAccessories,
+                    site = selectedSiteId
                 )
 
                 val noteTexts = reportNotes.map { it.text }
@@ -3876,6 +3889,7 @@ fun InspectionFormScreen(
                         val snapshotAccessories = reportAccessories.toList()
                         val snapshotDefects = reportDefects.toList()
                         val snapshotNotes = reportNotes.toList()
+                        val snapshotSiteId = selectedSiteId
                         val isEditing = editingReport != null
                         scope.launch {
                         try {
@@ -3903,7 +3917,8 @@ fun InspectionFormScreen(
                                 reportDefects = snapshotDefects,
                                 reportNotes = snapshotNotes,
                                 html = "",
-                                isLockedForNewAccessories = true
+                                isLockedForNewAccessories = true,
+                                site = snapshotSiteId
                             )
                             saveAccessoryClientIfNeeded(
                                 clientMemoryStore = clientMemoryStore,
@@ -4296,6 +4311,7 @@ fun InspectionFormScreen(
             }
         )
     }
+
 
     if (showCapacityWarning) {
         AlertDialog(
@@ -5112,7 +5128,8 @@ private fun buildWorkingReportForStorage(
     reportDefects: List<ReportDefectRow>,
     reportNotes: List<ReportNoteRow>,
     html: String,
-    isLockedForNewAccessories: Boolean
+    isLockedForNewAccessories: Boolean,
+    site: String = ""
 ): ReportStorage.WorkingReport {
     return ReportStorage.WorkingReport(
         reportNumber = runningNumber,
@@ -5131,6 +5148,7 @@ private fun buildWorkingReportForStorage(
         inspectionPlaceType = inspectionPlaceType,
         fixedNote = fixedNote,
         generalNote = generalNote,
+        site = site,
         accessories = reportAccessories.map {
             ReportStorage.StoredAccessoryRow(
                 description = it.description,
@@ -5449,6 +5467,58 @@ private fun FullReportScreen(
                 minLines = 2
             )
         }
+    }
+}
+
+@Composable
+private fun SiteSelector(
+    sites: List<InspectorSettingsStorage.Site>,
+    selectedSiteId: String,
+    onSiteSelected: (String) -> Unit
+) {
+    if (sites.isEmpty()) return
+    var dialogOpen by remember { mutableStateOf(false) }
+
+    Button(
+        onClick = { dialogOpen = true },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(sites.firstOrNull { it.id == selectedSiteId }?.name ?: "בחר אתר בדיקה")
+    }
+
+    if (dialogOpen) {
+        AlertDialog(
+            onDismissRequest = { dialogOpen = false },
+            title = { Text("בחר אתר בדיקה") },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 400.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    sites.forEach { site ->
+                        TextButton(
+                            onClick = {
+                                onSiteSelected(site.id)
+                                dialogOpen = false
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Text(site.name, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                                if (site.address.isNotBlank()) Text(site.address, fontSize = 12.sp, color = Color.Gray)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { dialogOpen = false }) { Text("סגור") }
+            }
+        )
     }
 }
 
