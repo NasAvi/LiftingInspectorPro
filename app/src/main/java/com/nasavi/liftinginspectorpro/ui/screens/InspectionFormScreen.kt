@@ -3850,15 +3850,7 @@ fun InspectionFormScreen(
         AlertDialog(
             onDismissRequest = { if (!pdfGenerationInProgress) confirmPdfDialogOpen = false },
             title = { Text("אישור הפקת PDF") },
-            text = {
-                Text(
-                    if (isLockedForNewAccessories) {
-                        "התסקיר כבר נעול להוספת אביזרים. האם להפיק גרסת PDF נוספת עם השינויים האחרונים?"
-                    } else {
-                        "האם אתה בטוח שברצונך להפיק תסקיר PDF? לאחר ההפקה לא ניתן יהיה להוסיף אביזרים חדשים לטבלת האביזרים בתסקיר זה. ניתן יהיה לפתוח את התסקיר שוב, לעדכן פרטים מותרים ולהפיק גרסאות PDF נוספות."
-                    }
-                )
-            },
+            text = { PdfConfirmDialogText(isLockedForNewAccessories, chainInfo.chainIndex) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -5532,6 +5524,26 @@ private fun rememberChainInfoState(editingReport: ReportStorage.WorkingReport?, 
             initialExternalInspectorName = editingReport?.externalInspectorName ?: "",
             initialExternalInspectionDate = editingReport?.externalInspectionDate ?: ""
         )
+    }
+}
+
+@Composable
+private fun PdfConfirmDialogText(isLockedForNewAccessories: Boolean, chainIndex: Int) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            if (isLockedForNewAccessories) {
+                "התסקיר כבר נעול להוספת אביזרים. האם להפיק גרסת PDF נוספת עם השינויים האחרונים?"
+            } else {
+                "האם אתה בטוח שברצונך להפיק תסקיר PDF? לאחר ההפקה לא ניתן יהיה להוסיף אביזרים חדשים לטבלת האביזרים בתסקיר זה. ניתן יהיה לפתוח את התסקיר שוב, לעדכן פרטים מותרים ולהפיק גרסאות PDF נוספות."
+            }
+        )
+        if (chainIndex >= 5) {
+            Text(
+                "שים לב: זוהי הבדיקה ה-5 בשרשרת. לפי הנוהל, הבדיקה הבאה חייבת להתבצע ע\"י בודק מוסמך חיצוני.",
+                color = Color(0xFFE65100),
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            )
+        }
     }
 }
 
