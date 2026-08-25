@@ -106,6 +106,7 @@ object ReportStorage {
 
         updated.add(report)
         saveWorkingReports(context, updated)
+        InspectionReminderScheduler.scheduleReminder(context, report)
     }
 
     fun loadWorkingReports(context: Context): List<WorkingReport> {

@@ -6,8 +6,12 @@ import android.os.Bundle
 import android.view.WindowInsets
 import android.view.WindowInsetsController
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -75,11 +79,21 @@ class MainActivity : ComponentActivity() {
             LiftingInspectorProTheme {
                 val context = LocalContext.current
 
+                val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                    ActivityResultContracts.RequestPermission()
+                ) { }
+
                 LaunchedEffect(Unit) {
                     AppThemeState.load(context)
                     kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
                         AppBackupManager(applicationContext).loadDefaultConfigIfFirstLaunch()
                         AppBackupManager.runMigrationsIfNeeded(applicationContext)
+                        com.nasavi.liftinginspectorpro.data.InspectionReminderScheduler.rescheduleAll(applicationContext)
+                    }
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+                        ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
                     }
                 }
 
