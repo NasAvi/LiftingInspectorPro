@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter
 
 /**
  * מתזמן תזכורות מקומיות (AlarmManager, ללא אינטרנט) לבדיקה הבאה של תסקיר.
- * בדיקות 1-4 בשרשרת: תזכורת שבוע מראש. בדיקה 5 (נדרש בודק מוסמך חיצוני): תזכורת חודש מראש.
+ * בדיקות 1-5 בשרשרת: תזכורת שבוע מראש. בדיקה 6 (נדרש בודק מוסמך חיצוני): תזכורת חודש מראש.
  */
 object InspectionReminderScheduler {
 
@@ -49,7 +49,7 @@ object InspectionReminderScheduler {
         cancelReminder(context, report.reportNumber)
 
         val nextDate = parseDateOrNull(report.nextInspectionDate) ?: return
-        val daysBefore = if (report.chainIndex >= 5) 30L else 7L
+        val daysBefore = if (report.chainIndex >= 6) 30L else 7L
         val reminderDate = nextDate.minusDays(daysBefore)
         if (reminderDate.isBefore(LocalDate.now())) return
 
@@ -59,7 +59,7 @@ object InspectionReminderScheduler {
             .toInstant()
             .toEpochMilli()
 
-        val message = if (report.chainIndex >= 5) {
+        val message = if (report.chainIndex >= 6) {
             "הבדיקה הבאה — נדרש בודק מוסמך חיצוני בעוד חודש"
         } else {
             "תסקיר ${report.reportNumber} — הבדיקה הבאה בעוד שבוע"

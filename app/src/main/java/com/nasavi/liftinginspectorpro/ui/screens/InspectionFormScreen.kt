@@ -5480,7 +5480,7 @@ private fun FullReportScreen(
 }
 
 /**
- * מעקב שרשרת בדיקות: 5 בדיקות פנים-מפעליות רצופות, ואז בדיקה ע"י בודק מוסמך חיצוני שמאפסת את המחזור.
+ * מעקב שרשרת בדיקות: 6 בדיקות פנים-מפעליות רצופות (כל 6 חודשים), ואז בדיקה ע"י בודק מוסמך חיצוני ב-42 החודש שמאפסת את המחזור.
  * מרוכז במחלקה אחת כדי לצמצם את מספר השורות בפונקציה הראשית (מגבלת bytecode של 64KB לפונקציה).
  */
 private class ChainInfoState(
@@ -5537,9 +5537,9 @@ private fun PdfConfirmDialogText(isLockedForNewAccessories: Boolean, chainIndex:
                 "האם אתה בטוח שברצונך להפיק תסקיר PDF? לאחר ההפקה לא ניתן יהיה להוסיף אביזרים חדשים לטבלת האביזרים בתסקיר זה. ניתן יהיה לפתוח את התסקיר שוב, לעדכן פרטים מותרים ולהפיק גרסאות PDF נוספות."
             }
         )
-        if (chainIndex >= 5) {
+        if (chainIndex >= 6) {
             Text(
-                "שים לב: זוהי הבדיקה ה-5 בשרשרת. לפי הנוהל, הבדיקה הבאה חייבת להתבצע ע\"י בודק מוסמך חיצוני.",
+                "שים לב: זוהי הבדיקה ה-6 בשרשרת. לפי הנוהל, הבדיקה הבאה חייבת להתבצע ע\"י בודק מוסמך חיצוני.",
                 color = Color(0xFFE65100),
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
             )
@@ -5551,11 +5551,11 @@ private fun PdfConfirmDialogText(isLockedForNewAccessories: Boolean, chainIndex:
 private fun ChainStatusSection(chainInfo: ChainInfoState) {
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
-            "בדיקה מספר ${chainInfo.chainIndex} מתוך 5 בשרשרת הבדיקות הפנים-מפעליות",
+            "בדיקה מספר ${chainInfo.chainIndex} מתוך 6 בשרשרת הבדיקות הפנים-מפעליות",
             fontSize = 13.sp,
             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
         )
-        if (chainInfo.chainIndex >= 5) {
+        if (chainInfo.chainIndex >= 6) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -5568,7 +5568,7 @@ private fun ChainStatusSection(chainInfo: ChainInfoState) {
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    "בדיקה זו היא הבדיקה ה-5 בשרשרת — נדרש בודק מוסמך חיצוני בבדיקה הבאה",
+                    "בדיקה זו היא הבדיקה ה-6 בשרשרת — נדרש בודק מוסמך חיצוני בבדיקה הבאה",
                     fontSize = 12.sp,
                     color = Color(0xFFE65100),
                     fontWeight = androidx.compose.ui.text.font.FontWeight.Bold

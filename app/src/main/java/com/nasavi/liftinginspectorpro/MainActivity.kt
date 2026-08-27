@@ -415,7 +415,7 @@ class MainActivity : ComponentActivity() {
                                         defects = emptyList(),
                                         html = "",
                                         isLockedForNewAccessories = false,
-                                        chainIndex = if (source.chainIndex >= 5) 1 else source.chainIndex + 1,
+                                        chainIndex = if (source.chainIndex >= 6) 1 else source.chainIndex + 1,
                                         previousReportNumber = source.reportNumber,
                                         previousInspectionDate = source.inspectionDate,
                                         previousInspectorName = listOf(source.inspectorFirstName, source.inspectorLastName)

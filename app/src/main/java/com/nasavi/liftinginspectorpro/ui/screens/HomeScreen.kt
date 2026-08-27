@@ -317,13 +317,23 @@ fun HomeScreen(
                 .padding(vertical = 14.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "בדיקת אביזרי הרמה",
-                color = Color.White,
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "בדיקת אביזרי הרמה",
+                    color = Color.White,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "הסמכת בודק פנים-מפעלי אינה כוללת אביזר בעל מנגנון מכני, חשמלי, פנאומטי או הידראולי",
+                    color = Color.White.copy(alpha = 0.85f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
         Column(

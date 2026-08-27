@@ -73,7 +73,7 @@ object ReportStorage {
         // true = כבר הופקה לפחות גרסת PDF אחת, ולכן לא מוסיפים אביזרים חדשים לתסקיר זה.
         val isLockedForNewAccessories: Boolean = false,
         val site: String = "",
-        // מעקב שרשרת בדיקות: 5 בדיקות פנים-מפעליות רצופות, ואז בדיקה ע"י בודק מוסמך חיצוני שמאפסת את המחזור.
+        // מעקב שרשרת בדיקות: 6 בדיקות פנים-מפעליות רצופות (כל 6 חודשים), ואז בדיקה ע"י בודק מוסמך חיצוני ב-42 החודש שמאפסת את המחזור.
         val chainIndex: Int = 1,
         val previousReportNumber: String = "",
         val previousInspectionDate: String = "",
